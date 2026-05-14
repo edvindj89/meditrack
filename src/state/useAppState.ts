@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { normalizeAppState } from '../domain/appState'
 import {
   addDoseRecord,
@@ -7,9 +7,11 @@ import {
   normalizeMedicine,
 } from '../domain/medicine'
 import {
+  clearAppState,
   createEmptyAppState,
   loadAppState,
   saveAppState,
+  type StorageNotice,
 } from '../storage/appStorage'
 import type { AppState, BackfillDoseInput, Medicine } from '../types/medicine'
 
@@ -25,13 +27,22 @@ function createEntityId(prefix: 'medicine' | 'dose') {
 }
 
 export function useAppState() {
-  const [appState, setAppState] = useState<AppState>(
-    () => loadAppState() ?? createEmptyAppState(),
+  const [initialLoadResult] = useState(loadAppState)
+  const [appState, setAppState] = useState<AppState>(initialLoadResult.appState)
+  const [storageNotice, setStorageNotice] = useState<StorageNotice | null>(
+    initialLoadResult.notice,
   )
+  const [storageError, setStorageError] = useState<string | null>(null)
 
-  useEffect(() => {
-    saveAppState(normalizeAppState(appState))
-  }, [appState])
+  const normalizedAppState = normalizeAppState(appState)
+
+  function commitAppState(nextState: AppState) {
+    const normalizedNextState = normalizeAppState(nextState)
+    setAppState(normalizedNextState)
+
+    const result = saveAppState(normalizedNextState)
+    setStorageError(result.ok ? null : result.message)
+  }
 
   function addMedicine(input: { name: string; cooldownMinutes: number }) {
     const medicine: Medicine = normalizeMedicine({
@@ -41,19 +52,19 @@ export function useAppState() {
       doses: [],
     })
 
-    setAppState((current) => ({
-      ...current,
-      medicines: [...current.medicines, medicine],
-    }))
+    commitAppState({
+      ...normalizedAppState,
+      medicines: [...normalizedAppState.medicines, medicine],
+    })
   }
 
   function updateMedicine(
     medicineId: string,
     input: { name: string; cooldownMinutes: number },
   ) {
-    setAppState((current) => ({
-      ...current,
-      medicines: current.medicines.map((medicine) =>
+    commitAppState({
+      ...normalizedAppState,
+      medicines: normalizedAppState.medicines.map((medicine) =>
         medicine.id === medicineId
           ? normalizeMedicine({
               ...medicine,
@@ -62,33 +73,33 @@ export function useAppState() {
             })
           : medicine,
       ),
-    }))
+    })
   }
 
   function deleteMedicine(medicineId: string) {
-    setAppState((current) => ({
-      ...current,
-      medicines: current.medicines.filter(
+    commitAppState({
+      ...normalizedAppState,
+      medicines: normalizedAppState.medicines.filter(
         (medicine) => medicine.id !== medicineId,
       ),
-    }))
+    })
   }
 
   function recordDoseNow(medicineId: string) {
-    setAppState((current) => ({
-      ...current,
-      medicines: current.medicines.map((medicine) =>
+    commitAppState({
+      ...normalizedAppState,
+      medicines: normalizedAppState.medicines.map((medicine) =>
         medicine.id === medicineId
           ? addDoseRecord(medicine, createDoseRecordNow(createEntityId('dose')))
           : medicine,
       ),
-    }))
+    })
   }
 
   function recordBackfilledDose(medicineId: string, input: BackfillDoseInput) {
-    setAppState((current) => ({
-      ...current,
-      medicines: current.medicines.map((medicine) =>
+    commitAppState({
+      ...normalizedAppState,
+      medicines: normalizedAppState.medicines.map((medicine) =>
         medicine.id === medicineId
           ? addDoseRecord(
               medicine,
@@ -98,15 +109,40 @@ export function useAppState() {
             )
           : medicine,
       ),
-    }))
+    })
+  }
+
+  function resetAllData() {
+    const result = clearAppState()
+    setAppState(createEmptyAppState())
+    setStorageNotice(
+      result.ok
+        ? {
+            kind: 'info',
+            message: 'Saved data was cleared on this device.',
+          }
+        : {
+            kind: 'warning',
+            message:
+              result.message ??
+              'Saved data could not be cleared on this device.',
+          },
+    )
+    setStorageError(result.ok ? null : result.message)
   }
 
   return {
-    appState: normalizeAppState(appState),
+    appState: normalizedAppState,
+    storageMessage: storageError ?? storageNotice?.message ?? null,
+    dismissStorageMessage: () => {
+      setStorageNotice(null)
+      setStorageError(null)
+    },
     addMedicine,
     updateMedicine,
     deleteMedicine,
     recordDoseNow,
     recordBackfilledDose,
+    resetAllData,
   }
 }

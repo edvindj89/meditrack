@@ -8,6 +8,7 @@
 .summary-grid,
 .medicine-section,
 .medicine-form-card,
+.persistence-notice,
 .empty-state {
   margin-top: 14px;
 }
@@ -16,6 +17,7 @@
 .medicine-section,
 .summary-card,
 .medicine-form-card,
+.persistence-notice,
 .empty-state {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -25,12 +27,14 @@
 .app-hero,
 .medicine-section,
 .medicine-form-card,
+.persistence-notice,
 .empty-state {
   border-radius: 24px;
 }
 
 .app-hero,
 .medicine-form-card,
+.persistence-notice,
 .empty-state {
   padding: 24px;
 }
@@ -83,6 +87,18 @@ h2 {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+}
+
+.persistence-notice {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.persistence-notice p {
+  color: var(--text-strong);
+  font-weight: 600;
 }
 
 .hero-timestamp,
@@ -383,6 +399,7 @@ h2 {
   .summary-card,
   .medicine-card,
   .medicine-form-card,
+  .persistence-notice,
   .empty-state {
     border-radius: 20px;
   }
@@ -396,7 +413,8 @@ h2 {
 
   .section-heading,
   .medicine-card__header,
-  .medicine-card__header-actions {
+  .medicine-card__header-actions,
+  .persistence-notice {
     flex-direction: column;
     align-items: flex-start;
   }

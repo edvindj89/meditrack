@@ -1,6 +1,6 @@
 # Architecture
 
-## Decisions made in Phases 2–6
+## Decisions made in Phases 2–7
 
 - The app is a **React + TypeScript + Vite PWA**.
 - Local persistence uses **browser localStorage** for the MVP.
@@ -53,12 +53,13 @@ interface AppState {
 
 ## Main screen structure
 
-- Hero with current timestamp and add-medicine action
+- Hero with current timestamp, add-medicine action, and reset-data action
 - Summary cards for total, ready now, cooling down, and soonest ready
 - A **Ready now** section
 - A **Cooling down** section sorted by shortest remaining wait
 - Add and edit medicine forms
 - Inline **Take now** and **Back-register** dose actions per medicine
+- Persistence notice banner when saved data was recovered or storage fails
 - Empty state when no medicines exist
 
 ## What this phase covers
@@ -69,12 +70,14 @@ interface AppState {
 - offline caching foundation
 - data model
 - local storage layer
+- persistence recovery and reset behavior
 - cooldown calculations
 - back-registration timestamp creation
 - medicine normalization and validation
 - domain tests
+- storage tests
 
 ## What comes next
 
-- Phase 7 will focus on persistence hardening and recovery behavior.
-- Later phases will expand installability polish.
+- Phase 8 will focus on installability and offline behavior polish.
+- Later phases can add notifications, backups, and sync.

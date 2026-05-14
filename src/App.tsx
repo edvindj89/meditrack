@@ -4,6 +4,7 @@ import { MedicineCard } from './components/MedicineCard'
 import { MedicineForm } from './components/MedicineForm'
 import { MedicineSection } from './components/MedicineSection'
 import { OverviewSummary } from './components/OverviewSummary'
+import { PersistenceNotice } from './components/PersistenceNotice'
 import { getMedicineStatus } from './domain/medicine'
 import { useAppState } from './state/useAppState'
 import { useNow } from './state/useNow'
@@ -14,11 +15,14 @@ import './App.css'
 function App() {
   const {
     appState,
+    storageMessage,
+    dismissStorageMessage,
     addMedicine,
     updateMedicine,
     deleteMedicine,
     recordDoseNow,
     recordBackfilledDose,
+    resetAllData,
   } = useAppState()
   const now = useNow()
   const [isAddOpen, setIsAddOpen] = useState(false)
@@ -61,6 +65,19 @@ function App() {
     }
   }
 
+  function handleResetAllData() {
+    const confirmed = window.confirm(
+      'Clear all medicines and recorded doses from this device?',
+    )
+    if (!confirmed) {
+      return
+    }
+
+    setIsAddOpen(false)
+    setEditingMedicine(null)
+    resetAllData()
+  }
+
   function closeForms() {
     setIsAddOpen(false)
     setEditingMedicine(null)
@@ -90,8 +107,24 @@ function App() {
           >
             Add medicine
           </button>
+          {appState.medicines.length > 0 ? (
+            <button
+              className="button button--ghost"
+              type="button"
+              onClick={handleResetAllData}
+            >
+              Reset data
+            </button>
+          ) : null}
         </div>
       </section>
+
+      {storageMessage ? (
+        <PersistenceNotice
+          message={storageMessage}
+          onDismiss={dismissStorageMessage}
+        />
+      ) : null}
 
       {isAddOpen ? (
         <MedicineForm
@@ -143,9 +176,11 @@ function App() {
                   now={now}
                   onEdit={setEditingMedicine}
                   onDelete={handleDeleteMedicine}
-                  onTakeNow={(medicine) => recordDoseNow(medicine.id)}
-                  onBackfill={(medicine, input) =>
-                    recordBackfilledDose(medicine.id, input)
+                  onTakeNow={(currentMedicine) =>
+                    recordDoseNow(currentMedicine.id)
+                  }
+                  onBackfill={(currentMedicine, input) =>
+                    recordBackfilledDose(currentMedicine.id, input)
                   }
                 />
               ))}
@@ -165,9 +200,11 @@ function App() {
                   now={now}
                   onEdit={setEditingMedicine}
                   onDelete={handleDeleteMedicine}
-                  onTakeNow={(medicine) => recordDoseNow(medicine.id)}
-                  onBackfill={(medicine, input) =>
-                    recordBackfilledDose(medicine.id, input)
+                  onTakeNow={(currentMedicine) =>
+                    recordDoseNow(currentMedicine.id)
+                  }
+                  onBackfill={(currentMedicine, input) =>
+                    recordBackfilledDose(currentMedicine.id, input)
                   }
                 />
               ))}
