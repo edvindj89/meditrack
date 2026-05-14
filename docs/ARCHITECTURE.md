@@ -1,6 +1,6 @@
 # Architecture
 
-## Decisions made in Phases 2–8
+## Decisions made in Phases 2–9
 
 - The app is a **React + TypeScript + Vite PWA**.
 - Local persistence uses **browser localStorage** for the MVP.
@@ -75,6 +75,7 @@ interface AppState {
 - install prompt handling
 - offline-ready and update-ready messaging
 - standalone app metadata and PNG icons
+- polished time and source formatting in the main UI
 - cooldown calculations
 - back-registration timestamp creation
 - medicine normalization and validation
@@ -83,5 +84,5 @@ interface AppState {
 
 ## What comes next
 
-- Phase 9 will focus on testing and final polish.
+- Phase 10 will focus on documentation and handoff.
 - Later phases can add notifications, backups, and sync.

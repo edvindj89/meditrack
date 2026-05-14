@@ -1,3 +1,5 @@
+import type { DoseSource } from '../types/medicine'
+
 const MINUTE_IN_MS = 60 * 1000
 const HOUR_IN_MS = 60 * MINUTE_IN_MS
 
@@ -17,8 +19,8 @@ export function formatCooldown(minutes: number): string {
 }
 
 export function formatRelativeDuration(ms: number): string {
-  if (ms <= 0) {
-    return '0 min'
+  if (ms < MINUTE_IN_MS) {
+    return 'Just now'
   }
 
   const hours = Math.floor(ms / HOUR_IN_MS)
@@ -43,4 +45,8 @@ export function formatTakenAt(value: string | Date): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date)
+}
+
+export function formatDoseSource(source: DoseSource): string {
+  return source === 'now' ? 'Taken now' : 'Back-registered'
 }

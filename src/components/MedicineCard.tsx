@@ -3,6 +3,7 @@ import { MINUTE_IN_MS, getMedicineStatus } from '../domain/medicine'
 import type { BackfillDoseInput, Medicine } from '../types/medicine'
 import {
   formatCooldown,
+  formatDoseSource,
   formatRelativeDuration,
   formatTakenAt,
 } from '../utils/time'
@@ -222,6 +223,14 @@ export function MedicineCard({
             {status.nextAllowedAt
               ? formatTakenAt(status.nextAllowedAt)
               : 'Any time'}
+          </dd>
+        </div>
+        <div>
+          <dt>Last source</dt>
+          <dd>
+            {status.latestDose
+              ? formatDoseSource(status.latestDose.source)
+              : 'No doses yet'}
           </dd>
         </div>
         <div>

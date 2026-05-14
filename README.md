@@ -4,7 +4,7 @@ Meditrack is a mobile-first medicine tracker for on-demand medicines with cooldo
 
 ## Current status
 
-Phase 8 is complete:
+Phase 9 is complete:
 
 - React + TypeScript + Vite scaffolded
 - PWA support enabled
@@ -18,6 +18,8 @@ Phase 8 is complete:
 - install prompt and offline/update notices added
 - PNG app icons and standalone metadata added
 - storage tests added
+- time-format polish and clearer dose-source labels added
+- test checklist/results documented
 - core medicine timing logic hardened
 - back-registration helpers added
 - domain tests added
@@ -68,5 +70,6 @@ For accurate install/offline testing during development, use:
 
 - `docs/DEVELOPMENT.md` — local setup, NeoVim, debugging, and PWA testing
 - `docs/ARCHITECTURE.md` — structure, data model, and domain logic
+- `docs/TESTING.md` — testing checklist and current results
 - `REQUIREMENTS.md` — MVP requirements
 - `IMPLEMENTATION_PLAN.md` — phase-by-phase plan
