@@ -1,31 +1,78 @@
-import { useEffect, useMemo, useState } from 'react'
-import { createSampleAppState } from '../data/sampleState'
+import { useEffect, useState } from 'react'
 import { normalizeAppState } from '../domain/appState'
-import { loadAppState, saveAppState } from '../storage/appStorage'
-import type { AppState } from '../types/medicine'
+import { normalizeMedicine } from '../domain/medicine'
+import {
+  createEmptyAppState,
+  loadAppState,
+  saveAppState,
+} from '../storage/appStorage'
+import type { AppState, Medicine } from '../types/medicine'
+
+function createMedicineId() {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
+    return crypto.randomUUID()
+  }
+
+  return `medicine-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
 
 export function useAppState() {
-  const [storedState, setStoredState] = useState<AppState | null>(() =>
-    loadAppState(),
+  const [appState, setAppState] = useState<AppState>(
+    () => loadAppState() ?? createEmptyAppState(),
   )
 
   useEffect(() => {
-    if (!storedState) {
-      return
-    }
+    saveAppState(normalizeAppState(appState))
+  }, [appState])
 
-    saveAppState(normalizeAppState(storedState))
-  }, [storedState])
+  function addMedicine(input: { name: string; cooldownMinutes: number }) {
+    const medicine: Medicine = normalizeMedicine({
+      id: createMedicineId(),
+      name: input.name,
+      cooldownMinutes: input.cooldownMinutes,
+      doses: [],
+    })
 
-  const previewState = useMemo(
-    () => normalizeAppState(createSampleAppState()),
-    [],
-  )
-  const appState = storedState ? normalizeAppState(storedState) : previewState
+    setAppState((current) => ({
+      ...current,
+      medicines: [...current.medicines, medicine],
+    }))
+  }
+
+  function updateMedicine(
+    medicineId: string,
+    input: { name: string; cooldownMinutes: number },
+  ) {
+    setAppState((current) => ({
+      ...current,
+      medicines: current.medicines.map((medicine) =>
+        medicine.id === medicineId
+          ? normalizeMedicine({
+              ...medicine,
+              name: input.name,
+              cooldownMinutes: input.cooldownMinutes,
+            })
+          : medicine,
+      ),
+    }))
+  }
+
+  function deleteMedicine(medicineId: string) {
+    setAppState((current) => ({
+      ...current,
+      medicines: current.medicines.filter(
+        (medicine) => medicine.id !== medicineId,
+      ),
+    }))
+  }
 
   return {
-    appState,
-    isUsingPreviewData: storedState === null,
-    setAppState: setStoredState,
+    appState: normalizeAppState(appState),
+    addMedicine,
+    updateMedicine,
+    deleteMedicine,
   }
 }

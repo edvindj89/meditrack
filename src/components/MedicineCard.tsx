@@ -9,9 +9,16 @@ import {
 interface MedicineCardProps {
   medicine: Medicine
   now: Date
+  onEdit: (medicine: Medicine) => void
+  onDelete: (medicine: Medicine) => void
 }
 
-export function MedicineCard({ medicine, now }: MedicineCardProps) {
+export function MedicineCard({
+  medicine,
+  now,
+  onEdit,
+  onDelete,
+}: MedicineCardProps) {
   const status = getMedicineStatus(medicine, now)
   const progress =
     status.elapsedMs === null
@@ -34,11 +41,29 @@ export function MedicineCard({ medicine, now }: MedicineCardProps) {
           </p>
           <h2>{medicine.name}</h2>
         </div>
-        <span
-          className={`medicine-card__status ${status.state === 'ready' ? 'medicine-card__status--ready' : 'medicine-card__status--waiting'}`}
-        >
-          {status.state === 'ready' ? 'Ready now' : 'Cooling down'}
-        </span>
+        <div className="medicine-card__header-actions">
+          <span
+            className={`medicine-card__status ${status.state === 'ready' ? 'medicine-card__status--ready' : 'medicine-card__status--waiting'}`}
+          >
+            {status.state === 'ready' ? 'Ready now' : 'Cooling down'}
+          </span>
+          <div className="medicine-card__action-row">
+            <button
+              className="button button--ghost button--small"
+              type="button"
+              onClick={() => onEdit(medicine)}
+            >
+              Edit
+            </button>
+            <button
+              className="button button--danger button--small"
+              type="button"
+              onClick={() => onDelete(medicine)}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="medicine-card__highlight">

@@ -6,25 +6,36 @@
 
 .app-hero,
 .summary-grid,
-.medicine-section {
+.medicine-section,
+.medicine-form-card,
+.empty-state {
   margin-top: 14px;
 }
 
 .app-hero,
 .medicine-section,
-.summary-card {
+.summary-card,
+.medicine-form-card,
+.empty-state {
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
 }
 
 .app-hero,
-.medicine-section {
+.medicine-section,
+.medicine-form-card,
+.empty-state {
   border-radius: 24px;
 }
 
-.app-hero {
+.app-hero,
+.medicine-form-card,
+.empty-state {
   padding: 24px;
+}
+
+.app-hero {
   display: grid;
   gap: 18px;
 }
@@ -63,6 +74,10 @@ h2 {
   max-width: 42rem;
 }
 
+.lead--compact {
+  max-width: 30rem;
+}
+
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
@@ -71,7 +86,6 @@ h2 {
 }
 
 .hero-timestamp,
-.preview-badge,
 .medicine-count,
 .medicine-card__status {
   width: fit-content;
@@ -84,11 +98,6 @@ h2 {
 .hero-timestamp {
   background: var(--code-bg);
   color: var(--text-strong);
-}
-
-.preview-badge {
-  background: var(--info-bg);
-  color: var(--info-text);
 }
 
 .summary-grid {
@@ -159,7 +168,8 @@ h2 {
   background: var(--surface-soft);
 }
 
-.medicine-card__header {
+.medicine-card__header,
+.medicine-card__header-actions {
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -178,6 +188,18 @@ h2 {
 .medicine-card__status--waiting {
   background: var(--warning-bg);
   color: var(--warning-text);
+}
+
+.medicine-card__action-row,
+.medicine-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.medicine-card__header-actions {
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .medicine-card__highlight {
@@ -237,6 +259,94 @@ h2 {
   font-weight: 600;
 }
 
+.empty-state {
+  display: grid;
+  gap: 16px;
+}
+
+.medicine-form-card__header {
+  margin-bottom: 18px;
+}
+
+.medicine-form {
+  display: grid;
+  gap: 16px;
+}
+
+.medicine-form__field {
+  display: grid;
+  gap: 8px;
+}
+
+.medicine-form__field span {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.medicine-form__field input {
+  width: 100%;
+  border: 1px solid var(--input-border);
+  border-radius: 14px;
+  background: var(--input-bg);
+  color: var(--text-strong);
+  padding: 12px 14px;
+}
+
+.medicine-form__field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.medicine-form__cooldown-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.medicine-form__error {
+  margin: 0;
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+.button {
+  border: none;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--accent-strong);
+}
+
+.button--ghost {
+  background: var(--code-bg);
+  color: var(--text-strong);
+}
+
+.button--ghost:hover {
+  background: var(--code-bg-strong);
+}
+
+.button--danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.button--danger:hover {
+  background: var(--danger-bg-strong);
+}
+
+.button--small {
+  padding: 8px 12px;
+  font-size: 0.86rem;
+}
+
 @media (max-width: 640px) {
   .app-shell {
     padding-inline: 10px;
@@ -245,17 +355,21 @@ h2 {
   .app-hero,
   .medicine-section,
   .summary-card,
-  .medicine-card {
+  .medicine-card,
+  .medicine-form-card,
+  .empty-state {
     border-radius: 20px;
   }
 
   .summary-grid,
-  .medicine-card__details {
+  .medicine-card__details,
+  .medicine-form__cooldown-group {
     grid-template-columns: 1fr;
   }
 
   .section-heading,
-  .medicine-card__header {
+  .medicine-card__header,
+  .medicine-card__header-actions {
     flex-direction: column;
     align-items: flex-start;
   }

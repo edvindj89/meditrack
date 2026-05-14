@@ -54,10 +54,12 @@ interface AppState {
 
 ## Main screen structure
 
-- Hero with current timestamp and preview-state badge
+- Hero with current timestamp and add-medicine action
 - Summary cards for total, ready now, cooling down, and soonest ready
 - A **Ready now** section
 - A **Cooling down** section sorted by shortest remaining wait
+- Add and edit medicine forms
+- Empty state when no medicines exist
 
 ## What this phase covers
 
@@ -74,5 +76,5 @@ interface AppState {
 
 ## What comes next
 
-- Phase 5 will add medicine management flows.
-- Later phases will add real dose recording UI.
+- Phase 6 will add real dose recording UI.
+- Later phases will expand persistence and installability polish.
