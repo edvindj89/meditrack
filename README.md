@@ -4,13 +4,14 @@ Meditrack is a mobile-first medicine tracker for on-demand medicines with cooldo
 
 ## Current status
 
-Phase 3 is complete:
+Phase 4 is complete:
 
 - React + TypeScript + Vite scaffolded
 - PWA support enabled
 - app data model defined
 - local storage layer added
-- initial mobile-first overview screen added
+- main screen grouped into ready and cooling-down sections
+- visual overview summary added
 - core medicine timing logic hardened
 - back-registration helpers added
 - domain tests added

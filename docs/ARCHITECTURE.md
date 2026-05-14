@@ -52,6 +52,13 @@ interface AppState {
 - `src/types/` — shared TypeScript model types
 - `src/utils/` — formatting helpers
 
+## Main screen structure
+
+- Hero with current timestamp and preview-state badge
+- Summary cards for total, ready now, cooling down, and soonest ready
+- A **Ready now** section
+- A **Cooling down** section sorted by shortest remaining wait
+
 ## What this phase covers
 
 - app shell
@@ -67,5 +74,5 @@ interface AppState {
 
 ## What comes next
 
-- Phase 4 will focus on the main screen UX and UI refinement.
-- Later phases will add CRUD flows and real dose recording UI.
+- Phase 5 will add medicine management flows.
+- Later phases will add real dose recording UI.

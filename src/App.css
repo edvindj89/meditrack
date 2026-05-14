@@ -1,27 +1,38 @@
 .app-shell {
-  width: min(100%, 52rem);
+  width: min(100%, 56rem);
   margin: 0 auto;
-  padding: 24px 16px 40px;
+  padding: 20px 14px 40px;
 }
 
 .app-hero,
-.medicine-list-section,
-.architecture-note {
+.summary-grid,
+.medicine-section {
+  margin-top: 14px;
+}
+
+.app-hero,
+.medicine-section,
+.summary-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 24px;
   box-shadow: var(--shadow);
+}
+
+.app-hero,
+.medicine-section {
+  border-radius: 24px;
 }
 
 .app-hero {
   padding: 24px;
   display: grid;
-  gap: 20px;
+  gap: 18px;
 }
 
 .eyebrow,
 .section-label,
-.medicine-card__eyebrow {
+.medicine-card__eyebrow,
+.summary-card__label {
   margin: 0;
   color: var(--accent);
   font-size: 0.78rem;
@@ -38,16 +49,28 @@ h2 {
 
 h1 {
   margin-top: 4px;
-  font-size: clamp(2.3rem, 7vw, 3.5rem);
+  font-size: clamp(2.2rem, 7vw, 3.4rem);
   line-height: 1.05;
 }
 
-.lead {
-  margin-top: 16px;
-  color: var(--muted);
-  max-width: 40rem;
+h2 {
+  font-size: 1.25rem;
 }
 
+.lead {
+  margin-top: 14px;
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.hero-timestamp,
 .preview-badge,
 .medicine-count,
 .medicine-card__status {
@@ -58,15 +81,57 @@ h1 {
   font-weight: 600;
 }
 
+.hero-timestamp {
+  background: var(--code-bg);
+  color: var(--text-strong);
+}
+
 .preview-badge {
   background: var(--info-bg);
   color: var(--info-text);
 }
 
-.medicine-list-section,
-.architecture-note {
-  margin-top: 16px;
-  padding: 20px;
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-card {
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.summary-card--ready {
+  background: linear-gradient(
+    180deg,
+    var(--surface) 0%,
+    var(--success-tint) 140%
+  );
+}
+
+.summary-card--waiting {
+  background: linear-gradient(
+    180deg,
+    var(--surface) 0%,
+    var(--warning-tint) 140%
+  );
+}
+
+.summary-card__value {
+  margin: 8px 0 0;
+  color: var(--text-strong);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.summary-card__value--small {
+  font-size: 1.15rem;
+}
+
+.medicine-section {
+  padding: 18px;
 }
 
 .section-heading {
@@ -74,7 +139,7 @@ h1 {
   justify-content: space-between;
   gap: 16px;
   align-items: flex-end;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .medicine-count {
@@ -103,7 +168,6 @@ h1 {
 
 .medicine-card__header h2 {
   margin-top: 6px;
-  font-size: 1.25rem;
 }
 
 .medicine-card__status--ready {
@@ -114,6 +178,40 @@ h1 {
 .medicine-card__status--waiting {
   background: var(--warning-bg);
   color: var(--warning-text);
+}
+
+.medicine-card__highlight {
+  margin-top: 16px;
+}
+
+.medicine-card__headline {
+  color: var(--text-strong);
+  font-size: 1.12rem;
+  font-weight: 700;
+}
+
+.medicine-card__subline {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.medicine-card__progress {
+  margin-top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--progress-track);
+  overflow: hidden;
+}
+
+.medicine-card__progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent-strong) 100%
+  );
 }
 
 .medicine-card__details {
@@ -139,37 +237,26 @@ h1 {
   font-weight: 600;
 }
 
-.architecture-note h2 {
-  font-size: 1.1rem;
-}
-
-.architecture-note ul {
-  margin: 16px 0 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 10px;
-  color: var(--muted);
-}
-
 @media (max-width: 640px) {
   .app-shell {
-    padding-inline: 12px;
+    padding-inline: 10px;
   }
 
   .app-hero,
-  .medicine-list-section,
-  .architecture-note,
+  .medicine-section,
+  .summary-card,
   .medicine-card {
     border-radius: 20px;
+  }
+
+  .summary-grid,
+  .medicine-card__details {
+    grid-template-columns: 1fr;
   }
 
   .section-heading,
   .medicine-card__header {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .medicine-card__details {
-    grid-template-columns: 1fr;
   }
 }
