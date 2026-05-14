@@ -4,11 +4,13 @@ Meditrack is a mobile-first medicine tracker for on-demand medicines with cooldo
 
 ## Current status
 
-Phase 1 is complete:
+Phase 2 is complete:
 
 - React + TypeScript + Vite scaffolded
-- local npm workflow verified
-- linting, formatting, and type-checking scripts added
+- PWA support enabled
+- app data model defined
+- local storage layer added
+- initial mobile-first overview screen added
 - NeoVim development workflow documented
 
 ## Stack
@@ -16,9 +18,8 @@ Phase 1 is complete:
 - React
 - TypeScript
 - Vite
+- vite-plugin-pwa
 - npm
-
-PWA-specific installability and offline work will be added in later phases.
 
 ## Prerequisites
 
@@ -42,11 +43,9 @@ This machine was verified with:
 - `npm run build` — production build
 - `npm run preview` — preview the built app locally
 
-## NeoVim and debugging
+## Docs
 
-See `docs/DEVELOPMENT.md` for:
-
-- NeoVim notes
-- formatting/linting workflow
-- browser debugging workflow
-- optional next steps for deeper debugging
+- `docs/DEVELOPMENT.md` — local setup, NeoVim, debugging
+- `docs/ARCHITECTURE.md` — Phase 2 structure and data model
+- `REQUIREMENTS.md` — MVP requirements
+- `IMPLEMENTATION_PLAN.md` — phase-by-phase plan

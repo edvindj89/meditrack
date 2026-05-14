@@ -78,6 +78,13 @@ If you want it later, the recommended path is:
 
 For the MVP, Chrome DevTools is the simplest and most reliable workflow.
 
+## PWA notes
+
+- Development uses the normal Vite dev server.
+- PWA install and offline behavior are best checked with a production build:
+  - `npm run build`
+  - `npm run preview`
+
 ## Phase 1 exit criteria status
 
 - App starts locally: yes
