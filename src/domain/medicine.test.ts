@@ -4,6 +4,7 @@ import {
   addDoseRecord,
   createBackfillTakenAt,
   createDoseRecordFromBackfill,
+  createDoseRecordNow,
   getMedicineStatus,
   normalizeMedicine,
 } from './medicine'
@@ -68,6 +69,18 @@ describe('medicine domain logic', () => {
     expect(() =>
       createBackfillTakenAt({ hoursAgo: -1, minutesAgo: 0 }),
     ).toThrow('Back-registration values must be non-negative integers.')
+  })
+
+  it('creates a now dose with matching timestamps', () => {
+    const now = new Date('2026-05-14T10:00:00.000Z')
+    const dose = createDoseRecordNow('dose-now', now)
+
+    expect(dose).toEqual({
+      id: 'dose-now',
+      takenAt: '2026-05-14T10:00:00.000Z',
+      recordedAt: '2026-05-14T10:00:00.000Z',
+      source: 'now',
+    })
   })
 
   it('keeps doses sorted newest first when adding a dose', () => {

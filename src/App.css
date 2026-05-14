@@ -206,6 +206,13 @@ h2 {
   margin-top: 16px;
 }
 
+.medicine-card__dose-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
 .medicine-card__headline {
   color: var(--text-strong);
   font-size: 1.12rem;
@@ -234,6 +241,20 @@ h2 {
     var(--accent) 0%,
     var(--accent-strong) 100%
   );
+}
+
+.backfill-form {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 14px;
+}
+
+.backfill-form__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .medicine-card__details {
@@ -324,6 +345,11 @@ h2 {
   background: var(--accent-strong);
 }
 
+.button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .button--ghost {
   background: var(--code-bg);
   color: var(--text-strong);
@@ -363,7 +389,8 @@ h2 {
 
   .summary-grid,
   .medicine-card__details,
-  .medicine-form__cooldown-group {
+  .medicine-form__cooldown-group,
+  .backfill-form__fields {
     grid-template-columns: 1fr;
   }
 

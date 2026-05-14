@@ -12,8 +12,14 @@ import { formatTakenAt } from './utils/time'
 import './App.css'
 
 function App() {
-  const { appState, addMedicine, updateMedicine, deleteMedicine } =
-    useAppState()
+  const {
+    appState,
+    addMedicine,
+    updateMedicine,
+    deleteMedicine,
+    recordDoseNow,
+    recordBackfilledDose,
+  } = useAppState()
   const now = useNow()
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null)
@@ -67,8 +73,8 @@ function App() {
           <p className="eyebrow">Meditrack</p>
           <h1>Medicine cooldowns at a glance.</h1>
           <p className="lead">
-            Add medicines, adjust their cooldowns, and keep the overview easy to
-            scan on a phone.
+            Add medicines, record doses now or in retrospect, and keep the
+            overview easy to scan on a phone.
           </p>
         </div>
 
@@ -137,6 +143,10 @@ function App() {
                   now={now}
                   onEdit={setEditingMedicine}
                   onDelete={handleDeleteMedicine}
+                  onTakeNow={(medicine) => recordDoseNow(medicine.id)}
+                  onBackfill={(medicine, input) =>
+                    recordBackfilledDose(medicine.id, input)
+                  }
                 />
               ))}
             </MedicineSection>
@@ -155,6 +165,10 @@ function App() {
                   now={now}
                   onEdit={setEditingMedicine}
                   onDelete={handleDeleteMedicine}
+                  onTakeNow={(medicine) => recordDoseNow(medicine.id)}
+                  onBackfill={(medicine, input) =>
+                    recordBackfilledDose(medicine.id, input)
+                  }
                 />
               ))}
             </MedicineSection>

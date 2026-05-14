@@ -1,12 +1,12 @@
 # Architecture
 
-## Decisions made in Phases 2 and 3
+## Decisions made in Phases 2–6
 
 - The app is a **React + TypeScript + Vite PWA**.
 - Local persistence uses **browser localStorage** for the MVP.
 - The app state is versioned so storage can be migrated later if needed.
 - A medicine stores its cooldown and an internal list of dose records.
-- The UI currently renders preview data when no saved app state exists yet.
+- The app starts from saved local data or an empty state.
 - Core cooldown logic lives in a dedicated domain module.
 - App state is normalized before being saved or loaded.
 - Back-registration is expressed as hours/minutes ago and converted into a timestamp.
@@ -45,7 +45,6 @@ interface AppState {
 ## Source structure
 
 - `src/components/` — UI building blocks
-- `src/data/` — preview/demo data for the current shell
 - `src/domain/` — medicine timing and validation logic
 - `src/state/` — app state hooks
 - `src/storage/` — persistence helpers
@@ -59,6 +58,7 @@ interface AppState {
 - A **Ready now** section
 - A **Cooling down** section sorted by shortest remaining wait
 - Add and edit medicine forms
+- Inline **Take now** and **Back-register** dose actions per medicine
 - Empty state when no medicines exist
 
 ## What this phase covers
@@ -76,5 +76,5 @@ interface AppState {
 
 ## What comes next
 
-- Phase 6 will add real dose recording UI.
-- Later phases will expand persistence and installability polish.
+- Phase 7 will focus on persistence hardening and recovery behavior.
+- Later phases will expand installability polish.
