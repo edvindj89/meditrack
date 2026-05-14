@@ -1,11 +1,12 @@
 import { ArchitectureNote } from './components/ArchitectureNote'
 import { MedicineCard } from './components/MedicineCard'
 import { useAppState } from './state/useAppState'
+import { useNow } from './state/useNow'
 import './App.css'
 
 function App() {
   const { appState, isUsingPreviewData } = useAppState()
-  const now = new Date()
+  const now = useNow()
 
   return (
     <main className="app-shell">
@@ -14,14 +15,15 @@ function App() {
           <p className="eyebrow">Meditrack</p>
           <h1>Medicine cooldowns at a glance.</h1>
           <p className="lead">
-            This is the Phase 2 app shell: PWA support, data model, local
-            storage layer, and the initial mobile-first overview screen.
+            Phase 3 hardens the medicine timing logic with reusable cooldown,
+            status, and back-registration helpers.
           </p>
         </div>
 
         {isUsingPreviewData ? (
           <p className="preview-badge">
-            Preview data is shown until CRUD flows are built.
+            Preview data is shown until CRUD flows are built. Timers refresh
+            automatically.
           </p>
         ) : null}
       </section>

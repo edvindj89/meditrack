@@ -1,3 +1,4 @@
+import { normalizeAppState } from '../domain/appState'
 import type { AppState } from '../types/medicine'
 
 export const APP_STORAGE_KEY = 'meditrack.app-state'
@@ -30,7 +31,7 @@ export function loadAppState(): AppState | null {
 
   try {
     const parsed: unknown = JSON.parse(raw)
-    return isAppState(parsed) ? parsed : null
+    return isAppState(parsed) ? normalizeAppState(parsed) : null
   } catch {
     return null
   }
@@ -41,5 +42,8 @@ export function saveAppState(appState: AppState): void {
     return
   }
 
-  window.localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState))
+  window.localStorage.setItem(
+    APP_STORAGE_KEY,
+    JSON.stringify(normalizeAppState(appState)),
+  )
 }

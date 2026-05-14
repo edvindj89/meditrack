@@ -47,6 +47,12 @@ export function createSampleAppState(): AppState {
           },
         ],
       },
+      {
+        id: 'cough-drops',
+        name: 'Cough drops',
+        cooldownMinutes: 2 * 60,
+        doses: [],
+      },
     ],
   }
 }

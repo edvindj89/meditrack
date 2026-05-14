@@ -18,6 +18,7 @@ This project uses **npm** to keep setup simple and avoid extra project tooling d
 - Start dev server for phone testing on the same network: `npm run dev:host`
 - Type-check: `npm run typecheck`
 - Lint: `npm run lint`
+- Test: `npm run test`
 - Format: `npm run format`
 - Build: `npm run build`
 - Preview build: `npm run preview`

@@ -1,12 +1,14 @@
 export function ArchitectureNote() {
   return (
     <section className="architecture-note" aria-label="Architecture decisions">
-      <h2>Phase 2 foundation</h2>
+      <h2>Phase 3 domain logic</h2>
       <ul>
-        <li>PWA support is enabled for installability and offline caching.</li>
-        <li>Data is modeled as medicines with cooldowns and dose records.</li>
-        <li>Local persistence is set up around browser localStorage.</li>
-        <li>The current list uses preview data until CRUD flows are built.</li>
+        <li>
+          Cooldown status is derived from a reusable medicine domain module.
+        </li>
+        <li>Back-registration is handled from hours/minutes-ago input.</li>
+        <li>Stored data is normalized before use and before saving.</li>
+        <li>Domain tests cover cooldown state, sorting, and backfill rules.</li>
       </ul>
     </section>
   )

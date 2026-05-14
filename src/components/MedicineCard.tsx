@@ -1,13 +1,9 @@
+import { getMedicineStatus } from '../domain/medicine'
 import type { Medicine } from '../types/medicine'
 import {
   formatCooldown,
   formatRelativeDuration,
   formatTakenAt,
-  getElapsedSinceLatestDose,
-  getLatestDose,
-  getNextAllowedAt,
-  getRemainingMs,
-  isMedicineReady,
 } from '../utils/time'
 
 interface MedicineCardProps {
@@ -16,10 +12,7 @@ interface MedicineCardProps {
 }
 
 export function MedicineCard({ medicine, now }: MedicineCardProps) {
-  const latestDose = getLatestDose(medicine)
-  const nextAllowedAt = getNextAllowedAt(medicine)
-  const ready = isMedicineReady(medicine, now)
-  const remainingMs = getRemainingMs(medicine, now)
+  const status = getMedicineStatus(medicine, now)
 
   return (
     <article className="medicine-card">
@@ -31,9 +24,11 @@ export function MedicineCard({ medicine, now }: MedicineCardProps) {
           <h2>{medicine.name}</h2>
         </div>
         <span
-          className={`medicine-card__status ${ready ? 'medicine-card__status--ready' : 'medicine-card__status--waiting'}`}
+          className={`medicine-card__status ${status.state === 'ready' ? 'medicine-card__status--ready' : 'medicine-card__status--waiting'}`}
         >
-          {ready ? 'Ready' : `Wait ${formatRelativeDuration(remainingMs)}`}
+          {status.state === 'ready'
+            ? 'Ready'
+            : `Wait ${formatRelativeDuration(status.remainingMs)}`}
         </span>
       </div>
 
@@ -41,18 +36,24 @@ export function MedicineCard({ medicine, now }: MedicineCardProps) {
         <div>
           <dt>Last taken</dt>
           <dd>
-            {latestDose ? formatTakenAt(latestDose.takenAt) : 'Not taken yet'}
+            {status.latestDose
+              ? formatTakenAt(status.latestDose.takenAt)
+              : 'Not taken yet'}
           </dd>
         </div>
         <div>
           <dt>Time since dose</dt>
-          <dd>{getElapsedSinceLatestDose(medicine, now)}</dd>
+          <dd>
+            {status.elapsedMs === null
+              ? 'Not taken yet'
+              : formatRelativeDuration(status.elapsedMs)}
+          </dd>
         </div>
         <div>
           <dt>Next allowed</dt>
           <dd>
-            {nextAllowedAt
-              ? formatTakenAt(nextAllowedAt.toISOString())
+            {status.nextAllowedAt
+              ? formatTakenAt(status.nextAllowedAt)
               : 'Any time'}
           </dd>
         </div>

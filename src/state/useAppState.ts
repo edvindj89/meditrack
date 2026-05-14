@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createSampleAppState } from '../data/sampleState'
+import { normalizeAppState } from '../domain/appState'
 import { loadAppState, saveAppState } from '../storage/appStorage'
 import type { AppState } from '../types/medicine'
 
@@ -13,11 +14,14 @@ export function useAppState() {
       return
     }
 
-    saveAppState(storedState)
+    saveAppState(normalizeAppState(storedState))
   }, [storedState])
 
-  const previewState = useMemo(() => createSampleAppState(), [])
-  const appState = storedState ?? previewState
+  const previewState = useMemo(
+    () => normalizeAppState(createSampleAppState()),
+    [],
+  )
+  const appState = storedState ? normalizeAppState(storedState) : previewState
 
   return {
     appState,
