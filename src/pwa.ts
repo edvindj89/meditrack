@@ -24,3 +24,19 @@ export async function updatePwa() {
 
   await updateServiceWorker(true)
 }
+
+export async function requestPersistentStorage() {
+  if (
+    typeof navigator === 'undefined' ||
+    !('storage' in navigator) ||
+    typeof navigator.storage.persist !== 'function'
+  ) {
+    return false
+  }
+
+  try {
+    return await navigator.storage.persist()
+  } catch {
+    return false
+  }
+}

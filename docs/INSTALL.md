@@ -13,6 +13,12 @@ That means one of these:
 
 A plain local network URL like `http://192.168.x.x:4173` is useful for layout testing, but may not provide full install/offline behavior on phones.
 
+## Production install URL
+
+Use this HTTPS URL on your phone for real install and offline setup:
+
+- `https://edvindj89.github.io/meditrack/`
+
 ## Build for install testing
 
 From the project root:
@@ -25,36 +31,37 @@ npm run preview:host
 
 Then open the shown URL from a browser.
 
-For the best real-device install test, host the built `dist/` files on HTTPS.
+For the best real-device install test, use the GitHub Pages URL above or another HTTPS host.
 
 ## Android install
 
 1. Open Meditrack in **Chrome** on Android.
-2. Wait for the page to finish loading.
-3. If Chrome shows **Install app**, tap it.
-4. If not, open the browser menu and choose **Add to Home screen** or **Install app**.
-5. Confirm the install.
-6. Launch Meditrack from its new app icon.
+2. If Chrome shows **Install**, tap it.
+3. If not, open the browser menu, tap **Add to Home screen**, then **Install**.
+4. Follow the on-screen steps.
+5. Launch Meditrack from its new app icon.
 
 ### Android checks
 
 - opens from its own icon
 - opens without browser chrome in standalone mode
 - still opens after the app has been loaded once and the device goes offline
+- if offline opening fails, remove the app, reopen the HTTPS URL once, reinstall, then test again
 
 ## iPhone install
 
 1. Open Meditrack in **Safari** on iPhone.
-2. Tap the **Share** button.
-3. Choose **Add to Home Screen**.
-4. Confirm the name and add it.
-5. Launch Meditrack from the new home screen icon.
+2. Tap **Share**. If needed, tap **More** first.
+3. Choose **Add to Home Screen**. If you do not see it, scroll down, tap **Edit Actions**, and add it.
+4. Make sure **Open as Web App** is on, then tap **Add**.
+5. Launch Meditrack from the new Home Screen icon.
 
 ### iPhone checks
 
 - opens from the home screen icon
 - opens in standalone/full-screen mode
 - app still opens after first load when offline support has been cached
+- if offline opening fails, remove the app, reopen the HTTPS URL once, reinstall, then test again
 
 ## Updating an installed app
 

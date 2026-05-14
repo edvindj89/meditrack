@@ -24,16 +24,15 @@ export function InstallHelp({ onClose }: InstallHelpProps) {
           <h3>Android</h3>
           <ol>
             <li>Open Meditrack in Chrome.</li>
-            <li>Wait until the page fully loads.</li>
             <li>
-              Tap <strong>Install app</strong> if Chrome offers it.
+              Tap <strong>Install</strong> if Chrome offers it.
             </li>
             <li>
-              If not, open the Chrome menu and choose{' '}
-              <strong>Install app</strong> or{' '}
-              <strong>Add to Home screen</strong>.
+              If not, open the Chrome menu, tap{' '}
+              <strong>Add to Home screen</strong>, then <strong>Install</strong>
+              .
             </li>
-            <li>Confirm the install.</li>
+            <li>Follow the on-screen steps.</li>
             <li>Launch Meditrack from its new app icon.</li>
           </ol>
         </article>
@@ -43,22 +42,26 @@ export function InstallHelp({ onClose }: InstallHelpProps) {
           <ol>
             <li>Open Meditrack in Safari.</li>
             <li>
-              Tap the <strong>Share</strong> button.
+              Tap <strong>Share</strong>. If needed, tap <strong>More</strong>{' '}
+              first.
             </li>
             <li>
-              Choose <strong>Add to Home Screen</strong>.
+              Choose <strong>Add to Home Screen</strong>. If you do not see it,
+              scroll down, tap <strong>Edit Actions</strong>, and add it.
             </li>
-            <li>Confirm the name and add it.</li>
-            <li>Launch Meditrack from the new home screen icon.</li>
+            <li>
+              Make sure <strong>Open as Web App</strong> is on, then tap{' '}
+              <strong>Add</strong>.
+            </li>
+            <li>Launch Meditrack from the new Home Screen icon.</li>
           </ol>
         </article>
       </div>
 
       <div className="install-help__note">
         <p>
-          For real install and offline testing, open Meditrack from an
-          <strong> HTTPS </strong>
-          address.
+          For real install and offline testing on a phone, open Meditrack from
+          an <strong>HTTPS</strong> address.
         </p>
         <p>
           After the first successful load, the app should keep opening even when

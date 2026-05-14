@@ -89,10 +89,10 @@ export function usePwaStatus() {
     }
 
     if (installEvent) {
-      return 'Install Meditrack for quick access from your home screen.'
+      return 'Install from this browser for quick home-screen access.'
     }
 
-    return 'On iPhone, open in Safari and use Share → Add to Home Screen.'
+    return 'Android: Chrome menu → Add to Home screen. iPhone: Safari → Share → Add to Home Screen.'
   }, [installEvent, isStandalone])
 
   async function promptInstall() {

@@ -162,6 +162,41 @@ export function addDoseRecord(medicine: Medicine, dose: DoseRecord): Medicine {
   }
 }
 
+export function updateDoseRecord(
+  medicine: Medicine,
+  doseId: string,
+  nextDose: DoseRecord,
+): Medicine {
+  return {
+    ...medicine,
+    doses: medicine.doses
+      .map((dose) => (dose.id === doseId ? nextDose : dose))
+      .sort(compareDoseRecordsByTakenAt),
+  }
+}
+
+export function removeDoseRecord(medicine: Medicine, doseId: string): Medicine {
+  return {
+    ...medicine,
+    doses: medicine.doses.filter((dose) => dose.id !== doseId),
+  }
+}
+
+export function updateDoseRecordFromBackfill(
+  dose: DoseRecord,
+  input: BackfillDoseInput,
+  recordedAt = new Date(),
+): DoseRecord {
+  const takenAt = createBackfillTakenAt(input, recordedAt)
+
+  return {
+    ...dose,
+    takenAt: takenAt.toISOString(),
+    recordedAt: recordedAt.toISOString(),
+    source: 'backfill',
+  }
+}
+
 export function normalizeMedicine(medicine: Medicine): Medicine {
   const cooldownMinutes = Number.isFinite(medicine.cooldownMinutes)
     ? Math.max(1, Math.floor(medicine.cooldownMinutes))

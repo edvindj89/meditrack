@@ -59,6 +59,10 @@ This machine was verified with:
 
 ## Installation
 
+Production install URL:
+
+- `https://edvindj89.github.io/meditrack/`
+
 See `docs/INSTALL.md` for Android and iPhone installation steps.
 
 ## Docs

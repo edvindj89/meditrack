@@ -4,7 +4,6 @@ import { InstallHelp } from './components/InstallHelp'
 import { MedicineCard } from './components/MedicineCard'
 import { MedicineForm } from './components/MedicineForm'
 import { MedicineSection } from './components/MedicineSection'
-import { OverviewSummary } from './components/OverviewSummary'
 import { PersistenceNotice } from './components/PersistenceNotice'
 import { PwaPanel } from './components/PwaPanel'
 import { getMedicineStatus } from './domain/medicine'
@@ -25,6 +24,8 @@ function App() {
     deleteMedicine,
     recordDoseNow,
     recordBackfilledDose,
+    updateLatestDoseTime,
+    removeLatestDose,
     resetAllData,
   } = useAppState()
   const {
@@ -44,7 +45,7 @@ function App() {
   const [isInstallHelpOpen, setIsInstallHelpOpen] = useState(false)
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null)
 
-  const { readyMedicines, waitingMedicines, nextReadyLabel } = useMemo(() => {
+  const { readyMedicines, waitingMedicines } = useMemo(() => {
     const entries = appState.medicines.map((medicine) => ({
       medicine,
       status: getMedicineStatus(medicine, now),
@@ -60,14 +61,14 @@ function App() {
       .filter((entry) => entry.status.state === 'waiting')
       .sort((left, right) => left.status.remainingMs - right.status.remainingMs)
 
-    const nextReady = waitingMedicines[0]?.status.nextAllowedAt
-
     return {
       readyMedicines,
       waitingMedicines,
-      nextReadyLabel: nextReady ? formatTakenAt(nextReady) : 'Now',
     }
   }, [appState.medicines, now])
+
+  const medicineCount = appState.medicines.length
+  const medicineCountLabel = `${medicineCount} ${medicineCount === 1 ? 'medicine' : 'medicines'}`
 
   function handleDeleteMedicine(medicine: Medicine) {
     const confirmed = window.confirm(`Delete ${medicine.name}?`)
@@ -101,20 +102,18 @@ function App() {
 
   return (
     <main className="app-shell">
-      <section className="app-hero">
+      <section className="app-hero app-hero--compact">
         <div>
           <p className="eyebrow">Meditrack</p>
-          <h1>Medicine cooldowns at a glance.</h1>
-          <p className="lead">
-            Add medicines, record doses now or in retrospect, and keep the
-            overview easy to scan on a phone.
+          <h1>Meditrack</h1>
+          <p className="hero-subtitle">
+            {medicineCountLabel} • Updated {formatTakenAt(now)}
           </p>
         </div>
 
-        <div className="hero-meta">
-          <p className="hero-timestamp">Updated {formatTakenAt(now)}</p>
+        <div className="hero-actions">
           <button
-            className="button"
+            className="button button--small"
             type="button"
             onClick={() => {
               setIsAddOpen(true)
@@ -125,7 +124,7 @@ function App() {
           </button>
           {appState.medicines.length > 0 ? (
             <button
-              className="button button--ghost"
+              className="button button--ghost button--small"
               type="button"
               onClick={handleResetAllData}
             >
@@ -134,24 +133,6 @@ function App() {
           ) : null}
         </div>
       </section>
-
-      <PwaPanel
-        canInstall={canInstall}
-        installHint={installHint}
-        isOnline={isOnline}
-        isStandalone={isStandalone}
-        needRefresh={needRefresh}
-        offlineReady={offlineReady}
-        onInstall={promptInstall}
-        onOpenInstallHelp={() => setIsInstallHelpOpen(true)}
-        onRefresh={refreshApp}
-        onDismissOfflineReady={dismissOfflineReady}
-        onDismissNeedRefresh={dismissNeedRefresh}
-      />
-
-      {isInstallHelpOpen ? (
-        <InstallHelp onClose={() => setIsInstallHelpOpen(false)} />
-      ) : null}
 
       {storageMessage ? (
         <PersistenceNotice
@@ -190,18 +171,10 @@ function App() {
         <EmptyState onAddMedicine={() => setIsAddOpen(true)} />
       ) : (
         <>
-          <OverviewSummary
-            total={appState.medicines.length}
-            readyCount={readyMedicines.length}
-            waitingCount={waitingMedicines.length}
-            nextReadyLabel={nextReadyLabel}
-          />
-
           {readyMedicines.length > 0 ? (
             <MedicineSection
               title="Ready now"
-              subtitle="Available"
-              badge={`${readyMedicines.length} ready`}
+              badge={`${readyMedicines.length}`}
             >
               {readyMedicines.map(({ medicine }) => (
                 <MedicineCard
@@ -216,6 +189,12 @@ function App() {
                   onBackfill={(currentMedicine, input) =>
                     recordBackfilledDose(currentMedicine.id, input)
                   }
+                  onEditLatestDose={(currentMedicine, input) =>
+                    updateLatestDoseTime(currentMedicine.id, input)
+                  }
+                  onRemoveLatestDose={(currentMedicine) =>
+                    removeLatestDose(currentMedicine.id)
+                  }
                 />
               ))}
             </MedicineSection>
@@ -224,8 +203,7 @@ function App() {
           {waitingMedicines.length > 0 ? (
             <MedicineSection
               title="Cooling down"
-              subtitle="Wait before next dose"
-              badge={`${waitingMedicines.length} waiting`}
+              badge={`${waitingMedicines.length}`}
             >
               {waitingMedicines.map(({ medicine }) => (
                 <MedicineCard
@@ -240,12 +218,36 @@ function App() {
                   onBackfill={(currentMedicine, input) =>
                     recordBackfilledDose(currentMedicine.id, input)
                   }
+                  onEditLatestDose={(currentMedicine, input) =>
+                    updateLatestDoseTime(currentMedicine.id, input)
+                  }
+                  onRemoveLatestDose={(currentMedicine) =>
+                    removeLatestDose(currentMedicine.id)
+                  }
                 />
               ))}
             </MedicineSection>
           ) : null}
         </>
       )}
+
+      {isInstallHelpOpen ? (
+        <InstallHelp onClose={() => setIsInstallHelpOpen(false)} />
+      ) : null}
+
+      <PwaPanel
+        canInstall={canInstall}
+        installHint={installHint}
+        isOnline={isOnline}
+        isStandalone={isStandalone}
+        needRefresh={needRefresh}
+        offlineReady={offlineReady}
+        onInstall={promptInstall}
+        onOpenInstallHelp={() => setIsInstallHelpOpen(true)}
+        onRefresh={refreshApp}
+        onDismissOfflineReady={dismissOfflineReady}
+        onDismissNeedRefresh={dismissNeedRefresh}
+      />
     </main>
   )
 }

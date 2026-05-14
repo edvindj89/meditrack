@@ -7,6 +7,9 @@ import {
   createDoseRecordNow,
   getMedicineStatus,
   normalizeMedicine,
+  removeDoseRecord,
+  updateDoseRecord,
+  updateDoseRecordFromBackfill,
 } from './medicine'
 
 function createMedicine(overrides: Partial<Medicine> = {}): Medicine {
@@ -107,6 +110,49 @@ describe('medicine domain logic', () => {
     )
 
     expect(updated.doses.map((dose) => dose.id)).toEqual(['dose-2', 'dose-1'])
+  })
+
+  it('updates an existing dose time from backfill input', () => {
+    const medicine = createMedicine({
+      doses: [
+        {
+          id: 'dose-1',
+          takenAt: '2026-05-14T10:00:00.000Z',
+          recordedAt: '2026-05-14T10:00:00.000Z',
+          source: 'now',
+        },
+      ],
+    })
+
+    const updatedDose = updateDoseRecordFromBackfill(
+      medicine.doses[0],
+      { hoursAgo: 1, minutesAgo: 15 },
+      new Date('2026-05-14T12:00:00.000Z'),
+    )
+    const updatedMedicine = updateDoseRecord(medicine, 'dose-1', updatedDose)
+
+    expect(updatedMedicine.doses[0]).toEqual({
+      id: 'dose-1',
+      takenAt: '2026-05-14T10:45:00.000Z',
+      recordedAt: '2026-05-14T12:00:00.000Z',
+      source: 'backfill',
+    })
+  })
+
+  it('removes a dose by id', () => {
+    const medicine = createMedicine({
+      doses: [
+        {
+          id: 'dose-1',
+          takenAt: '2026-05-14T10:00:00.000Z',
+          recordedAt: '2026-05-14T10:00:00.000Z',
+          source: 'now',
+        },
+      ],
+    })
+
+    const updatedMedicine = removeDoseRecord(medicine, 'dose-1')
+    expect(updatedMedicine.doses).toEqual([])
   })
 
   it('normalizes cooldown values and drops invalid dose timestamps', () => {

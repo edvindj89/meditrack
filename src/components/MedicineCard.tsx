@@ -8,6 +8,8 @@ import {
   formatTakenAt,
 } from '../utils/time'
 
+type DoseEditorMode = 'backfill-new' | 'edit-latest' | null
+
 interface MedicineCardProps {
   medicine: Medicine
   now: Date
@@ -15,6 +17,8 @@ interface MedicineCardProps {
   onDelete: (medicine: Medicine) => void
   onTakeNow: (medicine: Medicine) => void
   onBackfill: (medicine: Medicine, input: BackfillDoseInput) => void
+  onEditLatestDose: (medicine: Medicine, input: BackfillDoseInput) => void
+  onRemoveLatestDose: (medicine: Medicine) => void
 }
 
 export function MedicineCard({
@@ -24,8 +28,11 @@ export function MedicineCard({
   onDelete,
   onTakeNow,
   onBackfill,
+  onEditLatestDose,
+  onRemoveLatestDose,
 }: MedicineCardProps) {
-  const [isBackfillOpen, setIsBackfillOpen] = useState(false)
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false)
+  const [doseEditorMode, setDoseEditorMode] = useState<DoseEditorMode>(null)
   const [hoursAgo, setHoursAgo] = useState('1')
   const [minutesAgo, setMinutesAgo] = useState('0')
   const [backfillError, setBackfillError] = useState<string | null>(null)
@@ -42,11 +49,33 @@ export function MedicineCard({
           ),
         )
 
-  function resetBackfill() {
+  const compactWaitLabel =
+    status.remainingMs > 0 && status.remainingMs < MINUTE_IN_MS
+      ? 'under 1 min'
+      : formatRelativeDuration(status.remainingMs)
+
+  const primaryMeta = status.latestDose
+    ? `Cooldown ${formatCooldown(medicine.cooldownMinutes)} • Next ${status.nextAllowedAt ? formatTakenAt(status.nextAllowedAt) : 'now'}`
+    : `Cooldown ${formatCooldown(medicine.cooldownMinutes)} • Can take now`
+
+  const secondaryMeta = status.latestDose
+    ? `Last ${formatTakenAt(status.latestDose.takenAt)} • ${formatDoseSource(status.latestDose.source)}`
+    : 'No dose recorded yet'
+
+  function setDoseEditorFromElapsed(elapsedMs: number | null) {
+    const totalMinutes =
+      elapsedMs === null
+        ? 60
+        : Math.max(0, Math.floor(elapsedMs / MINUTE_IN_MS))
+    setHoursAgo(String(Math.floor(totalMinutes / 60)))
+    setMinutesAgo(String(totalMinutes % 60))
+  }
+
+  function closeDoseEditor() {
     setHoursAgo('1')
     setMinutesAgo('0')
     setBackfillError(null)
-    setIsBackfillOpen(false)
+    setDoseEditorMode(null)
   }
 
   function handleBackfillSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -66,17 +95,28 @@ export function MedicineCard({
       return
     }
 
-    if (parsedHours === 0 && parsedMinutes === 0) {
+    if (
+      doseEditorMode === 'backfill-new' &&
+      parsedHours === 0 &&
+      parsedMinutes === 0
+    ) {
       setBackfillError('Use Take now for a dose taken just now.')
       return
     }
 
     try {
-      onBackfill(medicine, {
+      const input = {
         hoursAgo: parsedHours,
         minutesAgo: parsedMinutes,
-      })
-      resetBackfill()
+      }
+
+      if (doseEditorMode === 'edit-latest') {
+        onEditLatestDose(medicine, input)
+      } else {
+        onBackfill(medicine, input)
+      }
+
+      closeDoseEditor()
     } catch (error) {
       setBackfillError(
         error instanceof Error ? error.message : 'Could not save dose.',
@@ -86,158 +126,179 @@ export function MedicineCard({
 
   return (
     <article className="medicine-card">
-      <div className="medicine-card__header">
-        <div>
-          <p className="medicine-card__eyebrow">
-            Cooldown {formatCooldown(medicine.cooldownMinutes)}
+      <div className="medicine-card__top">
+        <div className="medicine-card__main">
+          <h3 className="medicine-card__title">{medicine.name}</h3>
+          <p className="medicine-card__meta">{primaryMeta}</p>
+          <p className="medicine-card__meta medicine-card__meta--secondary">
+            {secondaryMeta}
           </p>
-          <h2>{medicine.name}</h2>
         </div>
-        <div className="medicine-card__header-actions">
+
+        <div className="medicine-card__top-right">
           <span
             className={`medicine-card__status ${status.state === 'ready' ? 'medicine-card__status--ready' : 'medicine-card__status--waiting'}`}
           >
-            {status.state === 'ready' ? 'Ready now' : 'Cooling down'}
+            {status.state === 'ready'
+              ? 'Ready now'
+              : `Wait ${compactWaitLabel}`}
           </span>
-          <div className="medicine-card__action-row">
+
+          <div className="medicine-card__menu">
             <button
-              className="button button--ghost button--small"
+              className="button button--ghost button--small button--icon"
               type="button"
-              onClick={() => onEdit(medicine)}
+              aria-label={`More actions for ${medicine.name}`}
+              onClick={() => setIsActionMenuOpen((current) => !current)}
             >
-              Edit
+              ⋯
             </button>
-            <button
-              className="button button--danger button--small"
-              type="button"
-              onClick={() => onDelete(medicine)}
-            >
-              Delete
-            </button>
+
+            {isActionMenuOpen ? (
+              <div className="medicine-card__menu-popover">
+                {status.latestDose ? (
+                  <>
+                    <button
+                      className="medicine-card__menu-item"
+                      type="button"
+                      onClick={() => {
+                        setIsActionMenuOpen(false)
+                        setBackfillError(null)
+                        setDoseEditorFromElapsed(status.elapsedMs)
+                        setDoseEditorMode('edit-latest')
+                      }}
+                    >
+                      Edit last dose
+                    </button>
+                    <button
+                      className="medicine-card__menu-item medicine-card__menu-item--danger"
+                      type="button"
+                      onClick={() => {
+                        setIsActionMenuOpen(false)
+                        if (
+                          window.confirm(
+                            `Remove the latest dose for ${medicine.name}?`,
+                          )
+                        ) {
+                          onRemoveLatestDose(medicine)
+                          closeDoseEditor()
+                        }
+                      }}
+                    >
+                      Remove last dose
+                    </button>
+                  </>
+                ) : null}
+                <button
+                  className="medicine-card__menu-item"
+                  type="button"
+                  onClick={() => {
+                    setIsActionMenuOpen(false)
+                    onEdit(medicine)
+                  }}
+                >
+                  Edit medicine
+                </button>
+                <button
+                  className="medicine-card__menu-item medicine-card__menu-item--danger"
+                  type="button"
+                  onClick={() => {
+                    setIsActionMenuOpen(false)
+                    onDelete(medicine)
+                  }}
+                >
+                  Delete medicine
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
 
-      <div className="medicine-card__highlight">
-        <div className="medicine-card__dose-actions">
-          <button
-            className="button"
-            type="button"
-            onClick={() => {
-              onTakeNow(medicine)
-              resetBackfill()
-            }}
-          >
-            Take now
-          </button>
-          <button
-            className="button button--ghost"
-            type="button"
-            onClick={() => {
-              setIsBackfillOpen((current) => !current)
-              setBackfillError(null)
-            }}
-          >
-            {isBackfillOpen ? 'Close back-register' : 'Back-register'}
-          </button>
-        </div>
-
-        <p className="medicine-card__headline">
-          {status.state === 'ready'
-            ? 'Can take another dose now'
-            : `Available in ${formatRelativeDuration(status.remainingMs)}`}
-        </p>
-        <p className="medicine-card__subline">
-          {status.nextAllowedAt
-            ? `Next allowed ${formatTakenAt(status.nextAllowedAt)}`
-            : 'No recorded dose yet'}
-        </p>
+      {status.latestDose ? (
         <div className="medicine-card__progress" aria-hidden="true">
           <span style={{ width: `${progress}%` }} />
         </div>
+      ) : null}
 
-        {isBackfillOpen ? (
-          <form className="backfill-form" onSubmit={handleBackfillSubmit}>
-            <div className="backfill-form__fields">
-              <label className="medicine-form__field">
-                <span>Hours ago</span>
-                <input
-                  type="number"
-                  min="0"
-                  inputMode="numeric"
-                  value={hoursAgo}
-                  onChange={(event) => setHoursAgo(event.target.value)}
-                />
-              </label>
-              <label className="medicine-form__field">
-                <span>Minutes ago</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="59"
-                  inputMode="numeric"
-                  value={minutesAgo}
-                  onChange={(event) => setMinutesAgo(event.target.value)}
-                />
-              </label>
-            </div>
-            {backfillError ? (
-              <p className="medicine-form__error">{backfillError}</p>
-            ) : null}
-            <div className="medicine-form__actions">
-              <button
-                className="button button--ghost"
-                type="button"
-                onClick={resetBackfill}
-              >
-                Cancel
-              </button>
-              <button className="button" type="submit">
-                Save back-registered dose
-              </button>
-            </div>
-          </form>
-        ) : null}
+      <div className="medicine-card__dose-actions">
+        <button
+          className="button button--small"
+          type="button"
+          onClick={() => {
+            onTakeNow(medicine)
+            closeDoseEditor()
+            setIsActionMenuOpen(false)
+          }}
+        >
+          Take now
+        </button>
+        <button
+          className="button button--ghost button--small"
+          type="button"
+          onClick={() => {
+            setBackfillError(null)
+            setDoseEditorMode((current) =>
+              current === 'backfill-new' ? null : 'backfill-new',
+            )
+            if (doseEditorMode !== 'backfill-new') {
+              setHoursAgo('1')
+              setMinutesAgo('0')
+            }
+          }}
+        >
+          {doseEditorMode === 'backfill-new' ? 'Close backdate' : 'Backdate'}
+        </button>
       </div>
 
-      <dl className="medicine-card__details">
-        <div>
-          <dt>Last taken</dt>
-          <dd>
-            {status.latestDose
-              ? formatTakenAt(status.latestDose.takenAt)
-              : 'Not taken yet'}
-          </dd>
-        </div>
-        <div>
-          <dt>Time since dose</dt>
-          <dd>
-            {status.elapsedMs === null
-              ? 'Not taken yet'
-              : formatRelativeDuration(status.elapsedMs)}
-          </dd>
-        </div>
-        <div>
-          <dt>Next allowed</dt>
-          <dd>
-            {status.nextAllowedAt
-              ? formatTakenAt(status.nextAllowedAt)
-              : 'Any time'}
-          </dd>
-        </div>
-        <div>
-          <dt>Last source</dt>
-          <dd>
-            {status.latestDose
-              ? formatDoseSource(status.latestDose.source)
-              : 'No doses yet'}
-          </dd>
-        </div>
-        <div>
-          <dt>Recorded doses</dt>
-          <dd>{medicine.doses.length}</dd>
-        </div>
-      </dl>
+      {doseEditorMode ? (
+        <form
+          className="backfill-form backfill-form--compact"
+          onSubmit={handleBackfillSubmit}
+        >
+          <div className="backfill-form__inline-fields">
+            <label className="medicine-form__field medicine-form__field--compact">
+              <span>Hours</span>
+              <input
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={hoursAgo}
+                onChange={(event) => setHoursAgo(event.target.value)}
+              />
+            </label>
+            <label className="medicine-form__field medicine-form__field--compact">
+              <span>Minutes</span>
+              <input
+                type="number"
+                min="0"
+                max="59"
+                inputMode="numeric"
+                value={minutesAgo}
+                onChange={(event) => setMinutesAgo(event.target.value)}
+              />
+            </label>
+            <button className="button button--small" type="submit">
+              Save
+            </button>
+            <button
+              className="button button--ghost button--small"
+              type="button"
+              onClick={closeDoseEditor}
+            >
+              Cancel
+            </button>
+          </div>
+          <p className="backfill-form__label">
+            {doseEditorMode === 'edit-latest'
+              ? 'Edit the latest recorded dose.'
+              : 'Record an older dose.'}
+          </p>
+          {backfillError ? (
+            <p className="medicine-form__error">{backfillError}</p>
+          ) : null}
+        </form>
+      ) : null}
     </article>
   )
 }

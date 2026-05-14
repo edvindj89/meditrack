@@ -4,7 +4,11 @@ import {
   addDoseRecord,
   createDoseRecordFromBackfill,
   createDoseRecordNow,
+  getLatestDose,
   normalizeMedicine,
+  removeDoseRecord,
+  updateDoseRecord,
+  updateDoseRecordFromBackfill,
 } from '../domain/medicine'
 import {
   clearAppState,
@@ -112,6 +116,42 @@ export function useAppState() {
     })
   }
 
+  function updateLatestDoseTime(medicineId: string, input: BackfillDoseInput) {
+    commitAppState({
+      ...normalizedAppState,
+      medicines: normalizedAppState.medicines.map((medicine) => {
+        if (medicine.id !== medicineId) {
+          return medicine
+        }
+
+        const latestDose = getLatestDose(medicine)
+        if (!latestDose) {
+          return medicine
+        }
+
+        return updateDoseRecord(
+          medicine,
+          latestDose.id,
+          updateDoseRecordFromBackfill(latestDose, input),
+        )
+      }),
+    })
+  }
+
+  function removeLatestDose(medicineId: string) {
+    commitAppState({
+      ...normalizedAppState,
+      medicines: normalizedAppState.medicines.map((medicine) => {
+        if (medicine.id !== medicineId) {
+          return medicine
+        }
+
+        const latestDose = getLatestDose(medicine)
+        return latestDose ? removeDoseRecord(medicine, latestDose.id) : medicine
+      }),
+    })
+  }
+
   function resetAllData() {
     const result = clearAppState()
     setAppState(createEmptyAppState())
@@ -143,6 +183,8 @@ export function useAppState() {
     deleteMedicine,
     recordDoseNow,
     recordBackfilledDose,
+    updateLatestDoseTime,
+    removeLatestDose,
     resetAllData,
   }
 }

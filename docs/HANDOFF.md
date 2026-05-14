@@ -32,6 +32,12 @@ Core capabilities included now:
 - testing checklist: `docs/TESTING.md`
 - architecture overview: `docs/ARCHITECTURE.md`
 
+## Deployment
+
+- GitHub Pages workflow: `.github/workflows/deploy-pages.yml`
+- production URL: `https://edvindj89.github.io/meditrack/`
+- build base path is configured for the `/meditrack/` project site in `vite.config.ts`
+
 ## Known limitations
 
 - no notifications/reminders

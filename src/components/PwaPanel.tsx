@@ -27,32 +27,31 @@ export function PwaPanel({
 }: PwaPanelProps) {
   return (
     <section className="pwa-panel" aria-label="App install and offline status">
-      <div className="pwa-panel__content">
-        <div>
-          <p className="section-label">Install and offline</p>
-          <h2>Use Meditrack like an app</h2>
-          <p className="lead lead--compact">{installHint}</p>
+      <div className="pwa-panel__content pwa-panel__content--compact">
+        <div className="pwa-panel__summary">
+          <p className="section-label">Install</p>
+          <p className="pwa-panel__hint">{installHint}</p>
           <p className="pwa-panel__status">
             {isOnline ? 'Online' : 'Offline'} ·{' '}
-            {isStandalone ? 'Standalone mode' : 'Browser mode'}
+            {isStandalone ? 'Standalone' : 'Browser'}
           </p>
         </div>
         <div className="pwa-panel__actions">
           {canInstall ? (
             <button
-              className="button"
+              className="button button--small"
               type="button"
               onClick={() => void onInstall()}
             >
-              Install app
+              Install
             </button>
           ) : null}
           <button
-            className="button button--ghost"
+            className="button button--ghost button--small"
             type="button"
             onClick={onOpenInstallHelp}
           >
-            Install help
+            Help
           </button>
         </div>
       </div>
