@@ -7,7 +7,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['app-icon.svg'],
+      includeAssets: [
+        'app-icon.svg',
+        'app-icon-192.png',
+        'app-icon-512.png',
+        'apple-touch-icon.png',
+        'favicon-64.png',
+      ],
       manifest: {
         name: 'Meditrack',
         short_name: 'Meditrack',
@@ -19,10 +25,22 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'app-icon.svg',
+            src: 'app-icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'app-icon-512.png',
             sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'app-icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },
@@ -30,7 +48,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
     }),
   ],

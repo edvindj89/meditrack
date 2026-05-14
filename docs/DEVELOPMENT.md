@@ -85,6 +85,13 @@ For the MVP, Chrome DevTools is the simplest and most reliable workflow.
 - PWA install and offline behavior are best checked with a production build:
   - `npm run build`
   - `npm run preview`
+- On Android, test installation from Chrome.
+- On iPhone, test **Add to Home Screen** from Safari.
+- Chrome DevTools can help verify:
+  - manifest
+  - service worker registration
+  - offline cache behavior
+  - installability warnings
 
 ## Phase 1 exit criteria status
 

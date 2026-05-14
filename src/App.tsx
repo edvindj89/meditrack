@@ -5,9 +5,11 @@ import { MedicineForm } from './components/MedicineForm'
 import { MedicineSection } from './components/MedicineSection'
 import { OverviewSummary } from './components/OverviewSummary'
 import { PersistenceNotice } from './components/PersistenceNotice'
+import { PwaPanel } from './components/PwaPanel'
 import { getMedicineStatus } from './domain/medicine'
 import { useAppState } from './state/useAppState'
 import { useNow } from './state/useNow'
+import { usePwaStatus } from './state/usePwaStatus'
 import type { Medicine } from './types/medicine'
 import { formatTakenAt } from './utils/time'
 import './App.css'
@@ -24,6 +26,18 @@ function App() {
     recordBackfilledDose,
     resetAllData,
   } = useAppState()
+  const {
+    canInstall,
+    installHint,
+    isOnline,
+    isStandalone,
+    needRefresh,
+    offlineReady,
+    dismissOfflineReady,
+    dismissNeedRefresh,
+    promptInstall,
+    refreshApp,
+  } = usePwaStatus()
   const now = useNow()
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null)
@@ -118,6 +132,19 @@ function App() {
           ) : null}
         </div>
       </section>
+
+      <PwaPanel
+        canInstall={canInstall}
+        installHint={installHint}
+        isOnline={isOnline}
+        isStandalone={isStandalone}
+        needRefresh={needRefresh}
+        offlineReady={offlineReady}
+        onInstall={promptInstall}
+        onRefresh={refreshApp}
+        onDismissOfflineReady={dismissOfflineReady}
+        onDismissNeedRefresh={dismissNeedRefresh}
+      />
 
       {storageMessage ? (
         <PersistenceNotice

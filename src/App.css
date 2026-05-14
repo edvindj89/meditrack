@@ -8,6 +8,7 @@
 .summary-grid,
 .medicine-section,
 .medicine-form-card,
+.pwa-panel,
 .persistence-notice,
 .empty-state {
   margin-top: 14px;
@@ -17,6 +18,7 @@
 .medicine-section,
 .summary-card,
 .medicine-form-card,
+.pwa-panel,
 .persistence-notice,
 .empty-state {
   background: var(--surface);
@@ -27,6 +29,7 @@
 .app-hero,
 .medicine-section,
 .medicine-form-card,
+.pwa-panel,
 .persistence-notice,
 .empty-state {
   border-radius: 24px;
@@ -34,6 +37,7 @@
 
 .app-hero,
 .medicine-form-card,
+.pwa-panel,
 .persistence-notice,
 .empty-state {
   padding: 24px;
@@ -89,6 +93,13 @@ h2 {
   align-items: center;
 }
 
+.pwa-panel,
+.persistence-notice {
+  display: grid;
+  gap: 16px;
+}
+
+.pwa-panel__content,
 .persistence-notice {
   display: flex;
   justify-content: space-between;
@@ -96,9 +107,30 @@ h2 {
   align-items: center;
 }
 
+.pwa-panel__status,
 .persistence-notice p {
   color: var(--text-strong);
   font-weight: 600;
+}
+
+.pwa-panel__status {
+  margin-top: 10px;
+}
+
+.pwa-panel__actions,
+.pwa-panel__notice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pwa-panel__notice {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
 }
 
 .hero-timestamp,
@@ -399,6 +431,7 @@ h2 {
   .summary-card,
   .medicine-card,
   .medicine-form-card,
+  .pwa-panel,
   .persistence-notice,
   .empty-state {
     border-radius: 20px;
@@ -414,6 +447,8 @@ h2 {
   .section-heading,
   .medicine-card__header,
   .medicine-card__header-actions,
+  .pwa-panel__content,
+  .pwa-panel__notice,
   .persistence-notice {
     flex-direction: column;
     align-items: flex-start;
