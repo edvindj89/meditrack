@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { EmptyState } from './components/EmptyState'
+import { InstallHelp } from './components/InstallHelp'
 import { MedicineCard } from './components/MedicineCard'
 import { MedicineForm } from './components/MedicineForm'
 import { MedicineSection } from './components/MedicineSection'
@@ -40,6 +41,7 @@ function App() {
   } = usePwaStatus()
   const now = useNow()
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isInstallHelpOpen, setIsInstallHelpOpen] = useState(false)
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null)
 
   const { readyMedicines, waitingMedicines, nextReadyLabel } = useMemo(() => {
@@ -141,10 +143,15 @@ function App() {
         needRefresh={needRefresh}
         offlineReady={offlineReady}
         onInstall={promptInstall}
+        onOpenInstallHelp={() => setIsInstallHelpOpen(true)}
         onRefresh={refreshApp}
         onDismissOfflineReady={dismissOfflineReady}
         onDismissNeedRefresh={dismissNeedRefresh}
       />
+
+      {isInstallHelpOpen ? (
+        <InstallHelp onClose={() => setIsInstallHelpOpen(false)} />
+      ) : null}
 
       {storageMessage ? (
         <PersistenceNotice

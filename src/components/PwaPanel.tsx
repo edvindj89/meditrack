@@ -6,6 +6,7 @@ interface PwaPanelProps {
   needRefresh: boolean
   offlineReady: boolean
   onInstall: () => void | Promise<void>
+  onOpenInstallHelp: () => void
   onRefresh: () => void | Promise<void>
   onDismissOfflineReady: () => void
   onDismissNeedRefresh: () => void
@@ -19,6 +20,7 @@ export function PwaPanel({
   needRefresh,
   offlineReady,
   onInstall,
+  onOpenInstallHelp,
   onRefresh,
   onDismissOfflineReady,
   onDismissNeedRefresh,
@@ -45,6 +47,13 @@ export function PwaPanel({
               Install app
             </button>
           ) : null}
+          <button
+            className="button button--ghost"
+            type="button"
+            onClick={onOpenInstallHelp}
+          >
+            Install help
+          </button>
         </div>
       </div>
 
