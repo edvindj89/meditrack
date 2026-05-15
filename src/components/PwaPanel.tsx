@@ -25,36 +25,43 @@ export function PwaPanel({
   onDismissOfflineReady,
   onDismissNeedRefresh,
 }: PwaPanelProps) {
+  const showInstallUi = !isStandalone
+
+  if (!showInstallUi && !offlineReady && !needRefresh) {
+    return null
+  }
+
   return (
     <section className="pwa-panel" aria-label="App install and offline status">
-      <div className="pwa-panel__content pwa-panel__content--compact">
-        <div className="pwa-panel__summary">
-          <p className="section-label">Install</p>
-          <p className="pwa-panel__hint">{installHint}</p>
-          <p className="pwa-panel__status">
-            {isOnline ? 'Online' : 'Offline'} ·{' '}
-            {isStandalone ? 'Standalone' : 'Browser'}
-          </p>
-        </div>
-        <div className="pwa-panel__actions">
-          {canInstall ? (
+      {showInstallUi ? (
+        <div className="pwa-panel__content pwa-panel__content--compact">
+          <div className="pwa-panel__summary">
+            <p className="section-label">Install</p>
+            <p className="pwa-panel__hint">{installHint}</p>
+            <p className="pwa-panel__status">
+              {isOnline ? 'Online' : 'Offline'} · Browser
+            </p>
+          </div>
+          <div className="pwa-panel__actions">
+            {canInstall ? (
+              <button
+                className="button button--small"
+                type="button"
+                onClick={() => void onInstall()}
+              >
+                Install
+              </button>
+            ) : null}
             <button
-              className="button button--small"
+              className="button button--ghost button--small"
               type="button"
-              onClick={() => void onInstall()}
+              onClick={onOpenInstallHelp}
             >
-              Install
+              Help
             </button>
-          ) : null}
-          <button
-            className="button button--ghost button--small"
-            type="button"
-            onClick={onOpenInstallHelp}
-          >
-            Help
-          </button>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {offlineReady ? (
         <div className="pwa-panel__notice">
