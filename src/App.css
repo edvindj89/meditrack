@@ -401,6 +401,12 @@ h2 {
   background: var(--accent-strong);
 }
 
+.button:disabled {
+  background: var(--code-bg);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
 .button--ghost {
   background: var(--code-bg);
   color: var(--text-strong);
@@ -408,6 +414,11 @@ h2 {
 
 .button--ghost:hover {
   background: var(--code-bg-strong);
+}
+
+.button--ghost:disabled {
+  background: var(--code-bg);
+  color: var(--muted);
 }
 
 .button--danger {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { normalizeAppState } from '../domain/appState'
 import {
   addDoseRecord,
+  canRecordNewDose,
   createDoseRecordFromBackfill,
   createDoseRecordNow,
   getLatestDose,
@@ -93,7 +94,7 @@ export function useAppState() {
     commitAppState({
       ...normalizedAppState,
       medicines: normalizedAppState.medicines.map((medicine) =>
-        medicine.id === medicineId
+        medicine.id === medicineId && canRecordNewDose(medicine)
           ? addDoseRecord(medicine, createDoseRecordNow(createEntityId('dose')))
           : medicine,
       ),
@@ -104,7 +105,7 @@ export function useAppState() {
     commitAppState({
       ...normalizedAppState,
       medicines: normalizedAppState.medicines.map((medicine) =>
-        medicine.id === medicineId
+        medicine.id === medicineId && canRecordNewDose(medicine)
           ? addDoseRecord(
               medicine,
               createDoseRecordFromBackfill(input, {

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Medicine } from '../types/medicine'
 import {
   addDoseRecord,
+  canRecordNewDose,
   createBackfillTakenAt,
   createDoseRecordFromBackfill,
   createDoseRecordNow,
@@ -57,6 +58,28 @@ describe('medicine domain logic', () => {
     expect(status.state).toBe('waiting')
     expect(status.remainingMs).toBe(4 * 60 * 60 * 1000)
     expect(status.nextAllowedAt?.toISOString()).toBe('2026-05-14T14:00:00.000Z')
+  })
+
+  it('allows a new dose only when the medicine is ready', () => {
+    expect(
+      canRecordNewDose(createMedicine(), new Date('2026-05-14T10:00:00.000Z')),
+    ).toBe(true)
+
+    expect(
+      canRecordNewDose(
+        createMedicine({
+          doses: [
+            {
+              id: 'dose-1',
+              takenAt: '2026-05-14T08:00:00.000Z',
+              recordedAt: '2026-05-14T08:00:00.000Z',
+              source: 'now',
+            },
+          ],
+        }),
+        new Date('2026-05-14T10:00:00.000Z'),
+      ),
+    ).toBe(false)
   })
 
   it('creates a backfilled dose timestamp from hours and minutes ago', () => {

@@ -37,6 +37,7 @@ export function MedicineCard({
   const [minutesAgo, setMinutesAgo] = useState('0')
   const [backfillError, setBackfillError] = useState<string | null>(null)
   const status = getMedicineStatus(medicine, now)
+  const isCoolingDown = status.state === 'waiting'
   const progress =
     status.elapsedMs === null
       ? 100
@@ -156,38 +157,38 @@ export function MedicineCard({
 
             {isActionMenuOpen ? (
               <div className="medicine-card__menu-popover">
+                {status.latestDose && !isCoolingDown ? (
+                  <button
+                    className="medicine-card__menu-item"
+                    type="button"
+                    onClick={() => {
+                      setIsActionMenuOpen(false)
+                      setBackfillError(null)
+                      setDoseEditorFromElapsed(status.elapsedMs)
+                      setDoseEditorMode('edit-latest')
+                    }}
+                  >
+                    Edit last dose
+                  </button>
+                ) : null}
                 {status.latestDose ? (
-                  <>
-                    <button
-                      className="medicine-card__menu-item"
-                      type="button"
-                      onClick={() => {
-                        setIsActionMenuOpen(false)
-                        setBackfillError(null)
-                        setDoseEditorFromElapsed(status.elapsedMs)
-                        setDoseEditorMode('edit-latest')
-                      }}
-                    >
-                      Edit last dose
-                    </button>
-                    <button
-                      className="medicine-card__menu-item medicine-card__menu-item--danger"
-                      type="button"
-                      onClick={() => {
-                        setIsActionMenuOpen(false)
-                        if (
-                          window.confirm(
-                            `Remove the latest dose for ${medicine.name}?`,
-                          )
-                        ) {
-                          onRemoveLatestDose(medicine)
-                          closeDoseEditor()
-                        }
-                      }}
-                    >
-                      Remove last dose
-                    </button>
-                  </>
+                  <button
+                    className="medicine-card__menu-item medicine-card__menu-item--danger"
+                    type="button"
+                    onClick={() => {
+                      setIsActionMenuOpen(false)
+                      if (
+                        window.confirm(
+                          `Remove the latest dose for ${medicine.name}?`,
+                        )
+                      ) {
+                        onRemoveLatestDose(medicine)
+                        closeDoseEditor()
+                      }
+                    }}
+                  >
+                    Remove last dose
+                  </button>
                 ) : null}
                 <button
                   className="medicine-card__menu-item"
@@ -225,7 +226,12 @@ export function MedicineCard({
         <button
           className="button button--small"
           type="button"
+          disabled={isCoolingDown}
           onClick={() => {
+            if (isCoolingDown) {
+              return
+            }
+
             onTakeNow(medicine)
             closeDoseEditor()
             setIsActionMenuOpen(false)
@@ -238,6 +244,19 @@ export function MedicineCard({
           type="button"
           onClick={() => {
             setBackfillError(null)
+
+            if (isCoolingDown) {
+              setDoseEditorMode((current) => {
+                if (current === 'edit-latest') {
+                  return null
+                }
+
+                setDoseEditorFromElapsed(status.elapsedMs)
+                return 'edit-latest'
+              })
+              return
+            }
+
             setDoseEditorMode((current) =>
               current === 'backfill-new' ? null : 'backfill-new',
             )
@@ -247,7 +266,13 @@ export function MedicineCard({
             }
           }}
         >
-          {doseEditorMode === 'backfill-new' ? 'Close backdate' : 'Backdate'}
+          {isCoolingDown
+            ? doseEditorMode === 'edit-latest'
+              ? 'Close edit'
+              : 'Edit'
+            : doseEditorMode === 'backfill-new'
+              ? 'Close backdate'
+              : 'Backdate'}
         </button>
       </div>
 

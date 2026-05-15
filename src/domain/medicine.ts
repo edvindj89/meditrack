@@ -100,6 +100,10 @@ export function getMedicineStatus(
   }
 }
 
+export function canRecordNewDose(medicine: Medicine, now = new Date()) {
+  return getMedicineStatus(medicine, now).state === 'ready'
+}
+
 export function createBackfillTakenAt(
   input: BackfillDoseInput,
   recordedAt = new Date(),
