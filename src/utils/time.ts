@@ -48,5 +48,13 @@ export function formatTakenAt(value: string | Date): string {
 }
 
 export function formatDoseSource(source: DoseSource): string {
-  return source === 'now' ? 'Taken now' : 'Back-registered'
+  if (source === 'now') {
+    return 'Taken now'
+  }
+
+  if (source === 'override') {
+    return 'Taken early'
+  }
+
+  return 'Back-registered'
 }

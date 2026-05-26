@@ -13,6 +13,7 @@ describe('time formatting helpers', () => {
 
   it('formats dose sources clearly', () => {
     expect(formatDoseSource('now')).toBe('Taken now')
+    expect(formatDoseSource('override')).toBe('Taken early')
     expect(formatDoseSource('backfill')).toBe('Back-registered')
   })
 })

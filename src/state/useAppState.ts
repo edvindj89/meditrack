@@ -5,7 +5,7 @@ import {
   canRecordNewDose,
   createDoseRecordFromBackfill,
   createDoseRecordNow,
-  getLatestDose,
+  getActiveDose,
   normalizeMedicine,
   removeDoseRecord,
   updateDoseRecord,
@@ -55,6 +55,7 @@ export function useAppState() {
       name: input.name,
       cooldownMinutes: input.cooldownMinutes,
       doses: [],
+      activeDoseId: null,
     })
 
     commitAppState({
@@ -90,14 +91,27 @@ export function useAppState() {
     })
   }
 
-  function recordDoseNow(medicineId: string) {
+  function recordDoseNow(medicineId: string, options?: { force?: boolean }) {
     commitAppState({
       ...normalizedAppState,
-      medicines: normalizedAppState.medicines.map((medicine) =>
-        medicine.id === medicineId && canRecordNewDose(medicine)
-          ? addDoseRecord(medicine, createDoseRecordNow(createEntityId('dose')))
-          : medicine,
-      ),
+      medicines: normalizedAppState.medicines.map((medicine) => {
+        if (medicine.id !== medicineId) {
+          return medicine
+        }
+
+        if (!options?.force && !canRecordNewDose(medicine)) {
+          return medicine
+        }
+
+        return addDoseRecord(
+          medicine,
+          createDoseRecordNow(
+            createEntityId('dose'),
+            new Date(),
+            options?.force ? 'override' : 'now',
+          ),
+        )
+      }),
     })
   }
 
@@ -117,7 +131,7 @@ export function useAppState() {
     })
   }
 
-  function updateLatestDoseTime(medicineId: string, input: BackfillDoseInput) {
+  function updateActiveDoseTime(medicineId: string, input: BackfillDoseInput) {
     commitAppState({
       ...normalizedAppState,
       medicines: normalizedAppState.medicines.map((medicine) => {
@@ -125,21 +139,21 @@ export function useAppState() {
           return medicine
         }
 
-        const latestDose = getLatestDose(medicine)
-        if (!latestDose) {
+        const activeDose = getActiveDose(medicine)
+        if (!activeDose) {
           return medicine
         }
 
         return updateDoseRecord(
           medicine,
-          latestDose.id,
-          updateDoseRecordFromBackfill(latestDose, input),
+          activeDose.id,
+          updateDoseRecordFromBackfill(activeDose, input),
         )
       }),
     })
   }
 
-  function removeLatestDose(medicineId: string) {
+  function removeActiveDose(medicineId: string) {
     commitAppState({
       ...normalizedAppState,
       medicines: normalizedAppState.medicines.map((medicine) => {
@@ -147,8 +161,8 @@ export function useAppState() {
           return medicine
         }
 
-        const latestDose = getLatestDose(medicine)
-        return latestDose ? removeDoseRecord(medicine, latestDose.id) : medicine
+        const activeDose = getActiveDose(medicine)
+        return activeDose ? removeDoseRecord(medicine, activeDose.id) : medicine
       }),
     })
   }
@@ -184,8 +198,8 @@ export function useAppState() {
     deleteMedicine,
     recordDoseNow,
     recordBackfilledDose,
-    updateLatestDoseTime,
-    removeLatestDose,
+    updateActiveDoseTime,
+    removeActiveDose,
     resetAllData,
   }
 }

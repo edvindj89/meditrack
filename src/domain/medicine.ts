@@ -1,6 +1,7 @@
 import type {
   BackfillDoseInput,
   DoseRecord,
+  DoseSource,
   Medicine,
   MedicineStatus,
   ValidationResult,
@@ -40,36 +41,46 @@ export function getLatestDose(medicine: Medicine): DoseRecord | undefined {
   return getSortedValidDoses(medicine)[0]
 }
 
-export function getElapsedMsSinceLatestDose(
+export function getActiveDose(medicine: Medicine): DoseRecord | undefined {
+  const doses = getSortedValidDoses(medicine)
+
+  if (!medicine.activeDoseId) {
+    return doses[0]
+  }
+
+  return doses.find((dose) => dose.id === medicine.activeDoseId) ?? doses[0]
+}
+
+export function getElapsedMsSinceActiveDose(
   medicine: Medicine,
   now = new Date(),
 ): number | null {
-  const latestDose = getLatestDose(medicine)
-  if (!latestDose) {
+  const activeDose = getActiveDose(medicine)
+  if (!activeDose) {
     return null
   }
 
-  const latestDoseTime = parseDate(latestDose.takenAt)
-  if (!latestDoseTime) {
+  const activeDoseTime = parseDate(activeDose.takenAt)
+  if (!activeDoseTime) {
     return null
   }
 
-  return Math.max(0, now.getTime() - latestDoseTime.getTime())
+  return Math.max(0, now.getTime() - activeDoseTime.getTime())
 }
 
 export function getNextAllowedAt(medicine: Medicine): Date | undefined {
-  const latestDose = getLatestDose(medicine)
-  if (!latestDose) {
+  const activeDose = getActiveDose(medicine)
+  if (!activeDose) {
     return undefined
   }
 
-  const latestDoseTime = parseDate(latestDose.takenAt)
-  if (!latestDoseTime) {
+  const activeDoseTime = parseDate(activeDose.takenAt)
+  if (!activeDoseTime) {
     return undefined
   }
 
   return new Date(
-    latestDoseTime.getTime() + medicine.cooldownMinutes * MINUTE_IN_MS,
+    activeDoseTime.getTime() + medicine.cooldownMinutes * MINUTE_IN_MS,
   )
 }
 
@@ -86,14 +97,14 @@ export function getMedicineStatus(
   medicine: Medicine,
   now = new Date(),
 ): MedicineStatus {
-  const latestDose = getLatestDose(medicine)
+  const activeDose = getActiveDose(medicine)
   const nextAllowedAt = getNextAllowedAt(medicine)
-  const elapsedMs = getElapsedMsSinceLatestDose(medicine, now)
+  const elapsedMs = getElapsedMsSinceActiveDose(medicine, now)
   const remainingMs = getRemainingMs(medicine, now)
 
   return {
     state: remainingMs === 0 ? 'ready' : 'waiting',
-    latestDose,
+    activeDose,
     nextAllowedAt,
     elapsedMs,
     remainingMs,
@@ -148,22 +159,27 @@ export function createDoseRecordFromBackfill(
   }
 }
 
-export function createDoseRecordNow(id: string, now = new Date()): DoseRecord {
+export function createDoseRecordNow(
+  id: string,
+  now = new Date(),
+  source: DoseSource = 'now',
+): DoseRecord {
   const timestamp = now.toISOString()
 
   return {
     id,
     takenAt: timestamp,
     recordedAt: timestamp,
-    source: 'now',
+    source,
   }
 }
 
 export function addDoseRecord(medicine: Medicine, dose: DoseRecord): Medicine {
-  return {
+  return normalizeMedicine({
     ...medicine,
-    doses: [...medicine.doses, dose].sort(compareDoseRecordsByTakenAt),
-  }
+    activeDoseId: dose.id,
+    doses: [...medicine.doses, dose],
+  })
 }
 
 export function updateDoseRecord(
@@ -171,19 +187,21 @@ export function updateDoseRecord(
   doseId: string,
   nextDose: DoseRecord,
 ): Medicine {
-  return {
+  return normalizeMedicine({
     ...medicine,
-    doses: medicine.doses
-      .map((dose) => (dose.id === doseId ? nextDose : dose))
-      .sort(compareDoseRecordsByTakenAt),
-  }
+    doses: medicine.doses.map((dose) => (dose.id === doseId ? nextDose : dose)),
+  })
 }
 
 export function removeDoseRecord(medicine: Medicine, doseId: string): Medicine {
-  return {
+  const remainingDoses = medicine.doses.filter((dose) => dose.id !== doseId)
+
+  return normalizeMedicine({
     ...medicine,
-    doses: medicine.doses.filter((dose) => dose.id !== doseId),
-  }
+    activeDoseId:
+      medicine.activeDoseId === doseId ? null : medicine.activeDoseId,
+    doses: remainingDoses,
+  })
 }
 
 export function updateDoseRecordFromBackfill(
@@ -197,7 +215,7 @@ export function updateDoseRecordFromBackfill(
     ...dose,
     takenAt: takenAt.toISOString(),
     recordedAt: recordedAt.toISOString(),
-    source: 'backfill',
+    source: dose.source === 'override' ? 'override' : 'backfill',
   }
 }
 
@@ -205,12 +223,17 @@ export function normalizeMedicine(medicine: Medicine): Medicine {
   const cooldownMinutes = Number.isFinite(medicine.cooldownMinutes)
     ? Math.max(1, Math.floor(medicine.cooldownMinutes))
     : 1
+  const doses = getSortedValidDoses(medicine)
+  const hasActiveDose = doses.some((dose) => dose.id === medicine.activeDoseId)
 
   return {
     ...medicine,
     name: medicine.name.trim(),
     cooldownMinutes,
-    doses: getSortedValidDoses(medicine),
+    doses,
+    activeDoseId: hasActiveDose
+      ? medicine.activeDoseId
+      : (doses[0]?.id ?? null),
   }
 }
 
@@ -232,6 +255,13 @@ export function validateMedicine(medicine: Medicine): ValidationResult {
     errors.push('Cooldown must be at least 1 minute.')
   }
 
+  if (
+    medicine.activeDoseId !== null &&
+    typeof medicine.activeDoseId !== 'string'
+  ) {
+    errors.push('Active dose id must be a string or null.')
+  }
+
   for (const dose of medicine.doses) {
     if (!dose.id.trim()) {
       errors.push('Dose id is required.')
@@ -240,6 +270,13 @@ export function validateMedicine(medicine: Medicine): ValidationResult {
     if (!parseDate(dose.takenAt) || !parseDate(dose.recordedAt)) {
       errors.push(`Dose ${dose.id || '(missing id)'} has an invalid timestamp.`)
     }
+  }
+
+  if (
+    medicine.activeDoseId !== null &&
+    !medicine.doses.some((dose) => dose.id === medicine.activeDoseId)
+  ) {
+    errors.push('Active dose id must point to an existing dose.')
   }
 
   return {

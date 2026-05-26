@@ -54,6 +54,7 @@ describe('appStorage', () => {
           name: '  Ibuprofen  ',
           cooldownMinutes: 90.9,
           doses: [],
+          activeDoseId: null,
         },
       ],
     }
@@ -69,6 +70,7 @@ describe('appStorage', () => {
         name: 'Ibuprofen',
         cooldownMinutes: 90,
         doses: [],
+        activeDoseId: null,
       },
     ])
   })

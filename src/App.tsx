@@ -24,8 +24,8 @@ function App() {
     deleteMedicine,
     recordDoseNow,
     recordBackfilledDose,
-    updateLatestDoseTime,
-    removeLatestDose,
+    updateActiveDoseTime,
+    removeActiveDose,
     resetAllData,
   } = useAppState()
   const {
@@ -183,17 +183,17 @@ function App() {
                   now={now}
                   onEdit={setEditingMedicine}
                   onDelete={handleDeleteMedicine}
-                  onTakeNow={(currentMedicine) =>
-                    recordDoseNow(currentMedicine.id)
+                  onTakeNow={(currentMedicine, options) =>
+                    recordDoseNow(currentMedicine.id, options)
                   }
                   onBackfill={(currentMedicine, input) =>
                     recordBackfilledDose(currentMedicine.id, input)
                   }
-                  onEditLatestDose={(currentMedicine, input) =>
-                    updateLatestDoseTime(currentMedicine.id, input)
+                  onEditActiveDose={(currentMedicine, input) =>
+                    updateActiveDoseTime(currentMedicine.id, input)
                   }
-                  onRemoveLatestDose={(currentMedicine) =>
-                    removeLatestDose(currentMedicine.id)
+                  onRemoveActiveDose={(currentMedicine) =>
+                    removeActiveDose(currentMedicine.id)
                   }
                 />
               ))}
@@ -212,17 +212,17 @@ function App() {
                   now={now}
                   onEdit={setEditingMedicine}
                   onDelete={handleDeleteMedicine}
-                  onTakeNow={(currentMedicine) =>
-                    recordDoseNow(currentMedicine.id)
+                  onTakeNow={(currentMedicine, options) =>
+                    recordDoseNow(currentMedicine.id, options)
                   }
                   onBackfill={(currentMedicine, input) =>
                     recordBackfilledDose(currentMedicine.id, input)
                   }
-                  onEditLatestDose={(currentMedicine, input) =>
-                    updateLatestDoseTime(currentMedicine.id, input)
+                  onEditActiveDose={(currentMedicine, input) =>
+                    updateActiveDoseTime(currentMedicine.id, input)
                   }
-                  onRemoveLatestDose={(currentMedicine) =>
-                    removeLatestDose(currentMedicine.id)
+                  onRemoveActiveDose={(currentMedicine) =>
+                    removeActiveDose(currentMedicine.id)
                   }
                 />
               ))}

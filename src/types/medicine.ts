@@ -1,4 +1,4 @@
-export type DoseSource = 'now' | 'backfill'
+export type DoseSource = 'now' | 'backfill' | 'override'
 export type MedicineAvailability = 'ready' | 'waiting'
 
 export interface DoseRecord {
@@ -18,11 +18,12 @@ export interface Medicine {
   name: string
   cooldownMinutes: number
   doses: DoseRecord[]
+  activeDoseId: string | null
 }
 
 export interface MedicineStatus {
   state: MedicineAvailability
-  latestDose?: DoseRecord
+  activeDose?: DoseRecord
   nextAllowedAt?: Date
   elapsedMs: number | null
   remainingMs: number

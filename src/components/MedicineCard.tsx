@@ -8,17 +8,17 @@ import {
   formatTakenAt,
 } from '../utils/time'
 
-type DoseEditorMode = 'backfill-new' | 'edit-latest' | null
+type DoseEditorMode = 'backfill-new' | 'edit-active' | null
 
 interface MedicineCardProps {
   medicine: Medicine
   now: Date
   onEdit: (medicine: Medicine) => void
   onDelete: (medicine: Medicine) => void
-  onTakeNow: (medicine: Medicine) => void
+  onTakeNow: (medicine: Medicine, options?: { force?: boolean }) => void
   onBackfill: (medicine: Medicine, input: BackfillDoseInput) => void
-  onEditLatestDose: (medicine: Medicine, input: BackfillDoseInput) => void
-  onRemoveLatestDose: (medicine: Medicine) => void
+  onEditActiveDose: (medicine: Medicine, input: BackfillDoseInput) => void
+  onRemoveActiveDose: (medicine: Medicine) => void
 }
 
 export function MedicineCard({
@@ -28,8 +28,8 @@ export function MedicineCard({
   onDelete,
   onTakeNow,
   onBackfill,
-  onEditLatestDose,
-  onRemoveLatestDose,
+  onEditActiveDose,
+  onRemoveActiveDose,
 }: MedicineCardProps) {
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false)
   const [doseEditorMode, setDoseEditorMode] = useState<DoseEditorMode>(null)
@@ -55,12 +55,12 @@ export function MedicineCard({
       ? 'under 1 min'
       : formatRelativeDuration(status.remainingMs)
 
-  const primaryMeta = status.latestDose
+  const primaryMeta = status.activeDose
     ? `Cooldown ${formatCooldown(medicine.cooldownMinutes)} • Next ${status.nextAllowedAt ? formatTakenAt(status.nextAllowedAt) : 'now'}`
     : `Cooldown ${formatCooldown(medicine.cooldownMinutes)} • Can take now`
 
-  const secondaryMeta = status.latestDose
-    ? `Last ${formatTakenAt(status.latestDose.takenAt)} • ${formatDoseSource(status.latestDose.source)}`
+  const secondaryMeta = status.activeDose
+    ? `${isCoolingDown ? 'Current' : 'Last'} ${formatTakenAt(status.activeDose.takenAt)} • ${formatDoseSource(status.activeDose.source)}`
     : 'No dose recorded yet'
 
   function setDoseEditorFromElapsed(elapsedMs: number | null) {
@@ -111,8 +111,8 @@ export function MedicineCard({
         minutesAgo: parsedMinutes,
       }
 
-      if (doseEditorMode === 'edit-latest') {
-        onEditLatestDose(medicine, input)
+      if (doseEditorMode === 'edit-active') {
+        onEditActiveDose(medicine, input)
       } else {
         onBackfill(medicine, input)
       }
@@ -123,6 +123,33 @@ export function MedicineCard({
         error instanceof Error ? error.message : 'Could not save dose.',
       )
     }
+  }
+
+  function handleTakeNow() {
+    if (isCoolingDown) {
+      const confirmed = window.confirm(
+        [
+          `Too early to take ${medicine.name}.`,
+          '',
+          `Wait ${compactWaitLabel} more before the next allowed dose.`,
+          `Next allowed: ${status.nextAllowedAt ? formatTakenAt(status.nextAllowedAt) : 'now'}`,
+          '',
+          'Taking it again too early may be unsafe.',
+          'Press OK only if you need to record another dose now.',
+        ].join('\n'),
+      )
+
+      if (!confirmed) {
+        return
+      }
+
+      onTakeNow(medicine, { force: true })
+    } else {
+      onTakeNow(medicine)
+    }
+
+    closeDoseEditor()
+    setIsActionMenuOpen(false)
   }
 
   return (
@@ -157,38 +184,38 @@ export function MedicineCard({
 
             {isActionMenuOpen ? (
               <div className="medicine-card__menu-popover">
-                {status.latestDose && !isCoolingDown ? (
-                  <button
-                    className="medicine-card__menu-item"
-                    type="button"
-                    onClick={() => {
-                      setIsActionMenuOpen(false)
-                      setBackfillError(null)
-                      setDoseEditorFromElapsed(status.elapsedMs)
-                      setDoseEditorMode('edit-latest')
-                    }}
-                  >
-                    Edit last dose
-                  </button>
-                ) : null}
-                {status.latestDose ? (
-                  <button
-                    className="medicine-card__menu-item medicine-card__menu-item--danger"
-                    type="button"
-                    onClick={() => {
-                      setIsActionMenuOpen(false)
-                      if (
-                        window.confirm(
-                          `Remove the latest dose for ${medicine.name}?`,
-                        )
-                      ) {
-                        onRemoveLatestDose(medicine)
-                        closeDoseEditor()
-                      }
-                    }}
-                  >
-                    Remove last dose
-                  </button>
+                {status.activeDose ? (
+                  <>
+                    <button
+                      className="medicine-card__menu-item"
+                      type="button"
+                      onClick={() => {
+                        setIsActionMenuOpen(false)
+                        setBackfillError(null)
+                        setDoseEditorFromElapsed(status.elapsedMs)
+                        setDoseEditorMode('edit-active')
+                      }}
+                    >
+                      Edit current dose
+                    </button>
+                    <button
+                      className="medicine-card__menu-item medicine-card__menu-item--danger"
+                      type="button"
+                      onClick={() => {
+                        setIsActionMenuOpen(false)
+                        if (
+                          window.confirm(
+                            `Remove the current dose for ${medicine.name}?`,
+                          )
+                        ) {
+                          onRemoveActiveDose(medicine)
+                          closeDoseEditor()
+                        }
+                      }}
+                    >
+                      Remove current dose
+                    </button>
+                  </>
                 ) : null}
                 <button
                   className="medicine-card__menu-item"
@@ -216,7 +243,7 @@ export function MedicineCard({
         </div>
       </div>
 
-      {status.latestDose ? (
+      {status.activeDose ? (
         <div className="medicine-card__progress" aria-hidden="true">
           <span style={{ width: `${progress}%` }} />
         </div>
@@ -226,16 +253,7 @@ export function MedicineCard({
         <button
           className="button button--small"
           type="button"
-          disabled={isCoolingDown}
-          onClick={() => {
-            if (isCoolingDown) {
-              return
-            }
-
-            onTakeNow(medicine)
-            closeDoseEditor()
-            setIsActionMenuOpen(false)
-          }}
+          onClick={handleTakeNow}
         >
           Take now
         </button>
@@ -247,12 +265,12 @@ export function MedicineCard({
 
             if (isCoolingDown) {
               setDoseEditorMode((current) => {
-                if (current === 'edit-latest') {
+                if (current === 'edit-active') {
                   return null
                 }
 
                 setDoseEditorFromElapsed(status.elapsedMs)
-                return 'edit-latest'
+                return 'edit-active'
               })
               return
             }
@@ -267,7 +285,7 @@ export function MedicineCard({
           }}
         >
           {isCoolingDown
-            ? doseEditorMode === 'edit-latest'
+            ? doseEditorMode === 'edit-active'
               ? 'Close edit'
               : 'Edit'
             : doseEditorMode === 'backfill-new'
@@ -315,8 +333,8 @@ export function MedicineCard({
             </button>
           </div>
           <p className="backfill-form__label">
-            {doseEditorMode === 'edit-latest'
-              ? 'Edit the latest recorded dose.'
+            {doseEditorMode === 'edit-active'
+              ? 'Edit the current cooldown start time.'
               : 'Record an older dose.'}
           </p>
           {backfillError ? (
