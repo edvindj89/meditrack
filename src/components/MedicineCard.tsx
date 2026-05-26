@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MedicineUsageChart } from './MedicineUsageChart'
 import { MINUTE_IN_MS, getMedicineStatus } from '../domain/medicine'
 import type { BackfillDoseInput, Medicine } from '../types/medicine'
 import {
@@ -33,6 +34,7 @@ export function MedicineCard({
 }: MedicineCardProps) {
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false)
   const [doseEditorMode, setDoseEditorMode] = useState<DoseEditorMode>(null)
+  const [isUsageOpen, setIsUsageOpen] = useState(false)
   const [hoursAgo, setHoursAgo] = useState('1')
   const [minutesAgo, setMinutesAgo] = useState('0')
   const [backfillError, setBackfillError] = useState<string | null>(null)
@@ -292,7 +294,18 @@ export function MedicineCard({
               ? 'Close backdate'
               : 'Backdate'}
         </button>
+        <button
+          className="button button--ghost button--small"
+          type="button"
+          onClick={() => setIsUsageOpen((current) => !current)}
+        >
+          {isUsageOpen ? 'Hide usage' : 'Usage'}
+        </button>
       </div>
+
+      {isUsageOpen ? (
+        <MedicineUsageChart medicine={medicine} now={now} />
+      ) : null}
 
       {doseEditorMode ? (
         <form

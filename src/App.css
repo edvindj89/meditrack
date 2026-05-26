@@ -234,6 +234,139 @@ h2 {
   margin-top: 10px;
 }
 
+.usage-chart {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
+
+.usage-chart__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.usage-chart__axis-note,
+.usage-chart__empty {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.usage-chart__timeframes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.usage-chart__timeframe--active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.usage-chart__timeframe--active:hover {
+  background: var(--accent-strong);
+}
+
+.usage-chart__scroll {
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.usage-chart__plot {
+  min-width: 100%;
+  display: grid;
+  grid-template-columns: 2rem minmax(20rem, 1fr);
+  gap: 8px;
+  align-items: end;
+}
+
+.usage-chart__y-axis {
+  min-height: 11rem;
+  display: grid;
+  align-content: stretch;
+}
+
+.usage-chart__y-axis span {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.usage-chart__canvas {
+  position: relative;
+  min-height: 11rem;
+}
+
+.usage-chart__grid {
+  position: absolute;
+  inset: 0 0 1.8rem 0;
+}
+
+.usage-chart__grid-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--border);
+}
+
+.usage-chart__bars {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(2rem, 1fr);
+  gap: 8px;
+  align-items: end;
+  min-height: 11rem;
+  padding-top: 0.5rem;
+}
+
+.usage-chart__bar-group {
+  min-width: 2rem;
+  display: grid;
+  grid-template-rows: 1rem minmax(7rem, 1fr) auto;
+  gap: 6px;
+  align-items: end;
+}
+
+.usage-chart__bar-value {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.usage-chart__bar-track {
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.usage-chart__bar {
+  display: block;
+  width: min(100%, 1.8rem);
+  min-height: 2px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(
+    180deg,
+    var(--accent-strong) 0%,
+    var(--accent) 100%
+  );
+}
+
+.usage-chart__bar-label {
+  text-align: center;
+  color: var(--text-strong);
+  font-size: 0.74rem;
+  line-height: 1.15;
+}
+
 .backfill-form {
   margin-top: 10px;
   padding-top: 10px;
@@ -463,7 +596,8 @@ h2 {
   .pwa-panel__content,
   .pwa-panel__notice,
   .persistence-notice,
-  .medicine-card__top {
+  .medicine-card__top,
+  .usage-chart__header {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -476,5 +610,9 @@ h2 {
   .medicine-form__cooldown-group,
   .install-help__grid {
     grid-template-columns: 1fr;
+  }
+
+  .usage-chart__plot {
+    grid-template-columns: 1.75rem minmax(24rem, 1fr);
   }
 }
