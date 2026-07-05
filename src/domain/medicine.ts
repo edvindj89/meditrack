@@ -225,6 +225,12 @@ export function normalizeMedicine(medicine: Medicine): Medicine {
     : 1
   const doses = getSortedValidDoses(medicine)
   const hasActiveDose = doses.some((dose) => dose.id === medicine.activeDoseId)
+  const createdAt =
+    parseDate(medicine.createdAt ?? '')?.toISOString() ??
+    new Date(0).toISOString()
+  const manualOrder = Number.isFinite(medicine.manualOrder)
+    ? Number(medicine.manualOrder)
+    : 0
 
   return {
     ...medicine,
@@ -234,6 +240,8 @@ export function normalizeMedicine(medicine: Medicine): Medicine {
     activeDoseId: hasActiveDose
       ? medicine.activeDoseId
       : (doses[0]?.id ?? null),
+    createdAt,
+    manualOrder,
   }
 }
 

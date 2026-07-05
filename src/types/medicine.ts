@@ -19,6 +19,8 @@ export interface Medicine {
   cooldownMinutes: number
   doses: DoseRecord[]
   activeDoseId: string | null
+  createdAt?: string
+  manualOrder?: number
 }
 
 export interface MedicineStatus {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { normalizeAppState } from '../domain/appState'
+import { compareMedicinesByManualOrder } from '../domain/sorting'
 import {
   addDoseRecord,
   canRecordNewDose,
@@ -50,12 +51,21 @@ export function useAppState() {
   }
 
   function addMedicine(input: { name: string; cooldownMinutes: number }) {
+    const now = new Date().toISOString()
+    const nextManualOrder =
+      normalizedAppState.medicines.reduce(
+        (highestOrder, medicine) =>
+          Math.max(highestOrder, medicine.manualOrder ?? 0),
+        -1,
+      ) + 1
     const medicine: Medicine = normalizeMedicine({
       id: createEntityId('medicine'),
       name: input.name,
       cooldownMinutes: input.cooldownMinutes,
       doses: [],
       activeDoseId: null,
+      createdAt: now,
+      manualOrder: nextManualOrder,
     })
 
     commitAppState({
@@ -167,6 +177,37 @@ export function useAppState() {
     })
   }
 
+  function updateManualOrder(orderedMedicineIds: string[]) {
+    const orderedIdSet = new Set(orderedMedicineIds)
+    const medicinesById = new Map(
+      normalizedAppState.medicines.map((medicine) => [medicine.id, medicine]),
+    )
+    const currentGlobalOrder = [...normalizedAppState.medicines].sort(
+      compareMedicinesByManualOrder,
+    )
+    let nextVisibleIndex = 0
+    const nextGlobalOrder = currentGlobalOrder.map((medicine) => {
+      if (!orderedIdSet.has(medicine.id)) {
+        return medicine
+      }
+
+      const nextMedicineId = orderedMedicineIds[nextVisibleIndex]
+      nextVisibleIndex += 1
+      return medicinesById.get(nextMedicineId) ?? medicine
+    })
+    const nextOrderById = new Map(
+      nextGlobalOrder.map((medicine, index) => [medicine.id, index]),
+    )
+
+    commitAppState({
+      ...normalizedAppState,
+      medicines: normalizedAppState.medicines.map((medicine) => ({
+        ...medicine,
+        manualOrder: nextOrderById.get(medicine.id) ?? medicine.manualOrder,
+      })),
+    })
+  }
+
   function resetAllData() {
     const result = clearAppState()
     setAppState(createEmptyAppState())
@@ -200,6 +241,7 @@ export function useAppState() {
     recordBackfilledDose,
     updateActiveDoseTime,
     removeActiveDose,
+    updateManualOrder,
     resetAllData,
   }
 }

@@ -5,7 +5,14 @@ export function normalizeAppState(appState: AppState): AppState {
   return {
     ...appState,
     medicines: appState.medicines
-      .map(normalizeMedicine)
+      .map((medicine, index) =>
+        normalizeMedicine({
+          ...medicine,
+          manualOrder: Number.isFinite(medicine.manualOrder)
+            ? medicine.manualOrder
+            : index,
+        }),
+      )
       .filter((medicine) => validateMedicine(medicine).isValid),
   }
 }
